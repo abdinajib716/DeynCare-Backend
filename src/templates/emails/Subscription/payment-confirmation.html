@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Confirmation - DeynCare</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="https://yourwebsite.com/logo.png" alt="DeynCare Logo" class="logo">
+        </div>
+        
+        <div class="content">
+            <h1>Payment Confirmation</h1>
+            
+            <p>Hello {{shopName}},</p>
+            
+            <div class="alert alert-success">
+                <strong>Success!</strong> We've received your payment for DeynCare.
+            </div>
+            
+            <div class="confirmation-details">
+                <h3>Payment Details</h3>
+                <table class="details-table">
+                    <tr>
+                        <td><strong>Amount:</strong></td>
+                        <td>{{amount}} {{currency}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Date:</strong></td>
+                        <td>{{paymentDate}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Transaction ID:</strong></td>
+                        <td>{{transactionId}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Payment Method:</strong></td>
+                        <td>{{paymentMethod}}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="subscription-info">
+                <h3>Subscription Information</h3>
+                <table class="details-table">
+                    <tr>
+                        <td><strong>Plan:</strong></td>
+                        <td>{{planType}} Plan</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status:</strong></td>
+                        <td>Active</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Next Billing Date:</strong></td>
+                        <td>{{endDate}}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="receipt-section">
+                <p>This email serves as your official receipt. You can also view your billing history in your account settings.</p>
+                <a href="{{accountUrl}}" class="text-link">View Billing History</a>
+            </div>
+            
+            <p>Thank you for your continued support. Your subscription gives you full access to all DeynCare features:</p>
+            
+            <ul class="feature-list-compact">
+                <li><span class="icon">✔</span> Debt Tracking</li>
+                <li><span class="icon">✔</span> Customer Payments</li>
+                <li><span class="icon">✔</span> SMS Reminders</li>
+                <li><span class="icon">✔</span> Smart Risk Score</li>
+                <li><span class="icon">✔</span> Product & Sales System</li>
+                <li><span class="icon">✔</span> Business Dashboard</li>
+                <li><span class="icon">✔</span> Export Reports</li>
+                <li><span class="icon">✔</span> Customer Profiles</li>
+                <li><span class="icon">✔</span> POS & Receipt</li>
+                <li><span class="icon">✔</span> Offline Support</li>
+            </ul>
+            
+            <div class="questions-section">
+                <p>If you have any questions about this payment or your subscription, please contact our support team at <a href="mailto:support@deyncare.com">support@deyncare.com</a>.</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 DeynCare. All rights reserved.</p>
+            <p>
+                <a href="{{privacyUrl}}">Privacy Policy</a> | 
+                <a href="{{termsUrl}}">Terms of Service</a> | 
+                <a href="{{unsubscribeUrl}}">Unsubscribe</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Canceled - DeynCare</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="https://yourwebsite.com/logo.png" alt="DeynCare Logo" class="logo">
+        </div>
+        
+        <div class="content">
+            <h1>Subscription Cancellation Confirmed</h1>
+            
+            <p>Hello {{shopName}},</p>
+            
+            <div class="alert alert-info">
+                <strong>Notice:</strong> Your DeynCare subscription has been canceled as requested.
+            </div>
+            
+            <div class="cancellation-details">
+                <h3>Cancellation Details</h3>
+                <table class="details-table">
+                    <tr>
+                        <td><strong>Plan:</strong></td>
+                        <td>{{planType}} Plan</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Access Until:</strong></td>
+                        <td>{{endDate}}{{#if immediateEffect}} (Immediate cancellation){{/if}}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            {{#unless immediateEffect}}
+            <div class="access-info">
+                <p>You will continue to have access to all DeynCare features until {{endDate}}. After this date, your access will be limited and your data will be retained for 30 days.</p>
+            </div>
+            {{/unless}}
+            
+            <div class="feedback-section">
+                <h3>We're Sorry to See You Go</h3>
+                <p>We appreciate the time you've spent with DeynCare. If you have a moment, we'd love to hear your feedback on how we could improve our service.</p>
+                <a href="{{feedbackUrl}}" class="secondary-button">Share Your Feedback</a>
+            </div>
+            
+            <div class="reactivation-section">
+                <h3>Changed Your Mind?</h3>
+                <p>You can reactivate your subscription at any time before {{endDate}} to continue using DeynCare without interruption.</p>
+                <a href="{{reactivateUrl}}" class="cta-button">Reactivate My Subscription</a>
+            </div>
+            
+            <div class="data-export">
+                <h3>Exporting Your Data</h3>
+                <p>If you'd like to export your data before your access ends, you can do so from your account settings.</p>
+                <a href="{{exportDataUrl}}" class="text-link">Export My Data</a>
+            </div>
+            
+            <p>If you have any questions or need assistance, our support team is available at <a href="mailto:support@deyncare.com">support@deyncare.com</a>.</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 DeynCare. All rights reserved.</p>
+            <p>
+                <a href="{{privacyUrl}}">Privacy Policy</a> | 
+                <a href="{{termsUrl}}">Terms of Service</a> | 
+                <a href="{{unsubscribeUrl}}">Unsubscribe</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Verification Request - DeynCare</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .verification-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #17a2b8;
+        }
+        .payment-details {
+            margin: 15px 0;
+        }
+        .action-buttons {
+            margin-top: 25px;
+            text-align: center;
+        }
+        .approve-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .reject-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .view-proof-btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="https://yourwebsite.com/logo.png" alt="DeynCare Logo" class="logo">
+        </div>
+        
+        <div class="content">
+            <h1>Payment Verification Request</h1>
+            
+            <p>Dear Admin,</p>
+            
+            <div class="alert alert-info">
+                <strong>Action Required:</strong> A new offline payment has been submitted and requires your verification.
+            </div>
+            
+            <div class="verification-box">
+                <h3>Payment Details</h3>
+                <div class="payment-details">
+                    <table class="details-table">
+                        <tr>
+                            <td><strong>Shop Name:</strong></td>
+                            <td>{{shopName}}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Payment ID:</strong></td>
+                            <td>{{paymentId}}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Subscription ID:</strong></td>
+                            <td>{{subscriptionId}}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Amount:</strong></td>
+                            <td>{{amount}} {{currency}}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Payment Method:</strong></td>
+                            <td>{{paymentMethod}}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Payer Name:</strong></td>
+                            <td>{{payerName}}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Date Submitted:</strong></td>
+                            <td>{{requestDate}}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Notes:</strong></td>
+                            <td>{{notes}}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="text-center">
+                    <a href="{{proofFileUrl}}" class="view-proof-btn">View Payment Proof</a>
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="{{approveUrl}}" class="approve-btn">Approve Payment</a>
+                    <a href="{{rejectUrl}}" class="reject-btn">Reject Payment</a>
+                </div>
+            </div>
+            
+            <p>Please review the payment proof and verify this payment. If approved, the subscription will be activated immediately.</p>
+            
+            <p>You can also verify this payment from your admin dashboard.</p>
+            
+            <a href="{{dashboardUrl}}" class="text-link">Go to Admin Dashboard</a>
+            
+            <div class="warning-section">
+                <p>Note: This request will expire after 7 days if no action is taken.</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 DeynCare. All rights reserved.</p>
+            <p>
+                <a href="{{privacyUrl}}">Privacy Policy</a> | 
+                <a href="{{termsUrl}}">Terms of Service</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

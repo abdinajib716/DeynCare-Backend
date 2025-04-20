@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Renewed - DeynCare</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="https://yourwebsite.com/logo.png" alt="DeynCare Logo" class="logo">
+        </div>
+        
+        <div class="content">
+            <h1>Your Subscription Has Been Renewed</h1>
+            
+            <p>Hello {{shopName}},</p>
+            
+            <div class="alert alert-success">
+                <strong>Success!</strong> Your DeynCare subscription has been automatically renewed.
+            </div>
+            
+            <div class="renewal-details">
+                <h3>Renewal Details</h3>
+                <table class="details-table">
+                    <tr>
+                        <td><strong>Plan:</strong></td>
+                        <td>{{planType}} Plan</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Amount:</strong></td>
+                        <td>{{price}} {{currency}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Next Billing Date:</strong></td>
+                        <td>{{endDate}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Payment Method:</strong></td>
+                        <td>{{paymentMethod}}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <p>You continue to have full access to all DeynCare features:</p>
+            
+            <ul class="feature-list">
+                <li><span class="icon">✔</span> <strong>Debt Tracking</strong> - Organize and monitor outstanding debts</li>
+                <li><span class="icon">✔</span> <strong>Customer Payments</strong> - Record and track all payments</li>
+                <li><span class="icon">✔</span> <strong>SMS Reminders</strong> - Automatic payment reminders</li>
+                <li><span class="icon">✔</span> <strong>Smart Risk Score</strong> - AI-powered risk assessment</li>
+                <li><span class="icon">✔</span> <strong>Product & Sales System</strong> - Complete inventory management</li>
+                <li><span class="icon">✔</span> <strong>Business Dashboard</strong> - Real-time business insights</li>
+                <li><span class="icon">✔</span> <strong>Export Reports</strong> - Comprehensive report generation</li>
+                <li><span class="icon">✔</span> <strong>Customer Profiles</strong> - Detailed customer database</li>
+                <li><span class="icon">✔</span> <strong>POS & Receipt</strong> - Professional point of sale system</li>
+                <li><span class="icon">✔</span> <strong>Offline Support</strong> - Work without internet connection</li>
+            </ul>
+            
+            <div class="receipt-section">
+                <p>This email serves as your renewal confirmation. A detailed receipt has been sent separately.</p>
+                <a href="{{billingHistoryUrl}}" class="text-link">View Billing History</a>
+            </div>
+            
+            <div class="auto-renewal-section">
+                <h3>Auto-Renewal Settings</h3>
+                <p>Your subscription is set to automatically renew on {{endDate}}. You can manage your auto-renewal settings in your account.</p>
+                <a href="{{subscriptionSettingsUrl}}" class="secondary-button">Manage Subscription</a>
+            </div>
+            
+            <p>If you have any questions about your renewal or subscription, please contact our support team at <a href="mailto:support@deyncare.com">support@deyncare.com</a>.</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 DeynCare. All rights reserved.</p>
+            <p>
+                <a href="{{privacyUrl}}">Privacy Policy</a> | 
+                <a href="{{termsUrl}}">Terms of Service</a> | 
+                <a href="{{unsubscribeUrl}}">Unsubscribe</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

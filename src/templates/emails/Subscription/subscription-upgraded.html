@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Upgraded - DeynCare</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="https://yourwebsite.com/logo.png" alt="DeynCare Logo" class="logo">
+        </div>
+        
+        <div class="content">
+            <h1>Subscription Successfully Upgraded!</h1>
+            
+            <p>Hello {{shopName}},</p>
+            
+            <div class="alert alert-success">
+                <strong>Success!</strong> Your subscription has been upgraded to the {{planType}} plan.
+            </div>
+            
+            <div class="confirmation-details">
+                <h3>Subscription Details</h3>
+                <table class="details-table">
+                    <tr>
+                        <td><strong>Plan:</strong></td>
+                        <td>{{planType}} Plan</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Price:</strong></td>
+                        <td>{{price}} {{currency}}/{{billingCycle}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Next Billing Date:</strong></td>
+                        <td>{{endDate}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Payment Method:</strong></td>
+                        <td>{{paymentMethod}}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <p>You now have full access to all DeynCare features:</p>
+            
+            <ul class="feature-list">
+                <li><span class="icon">✔</span> <strong>Debt Tracking</strong> - Organize and monitor outstanding debts</li>
+                <li><span class="icon">✔</span> <strong>Customer Payments</strong> - Record and track all payments</li>
+                <li><span class="icon">✔</span> <strong>SMS Reminders</strong> - Automatic payment reminders</li>
+                <li><span class="icon">✔</span> <strong>Smart Risk Score</strong> - AI-powered risk assessment</li>
+                <li><span class="icon">✔</span> <strong>Product & Sales System</strong> - Complete inventory management</li>
+                <li><span class="icon">✔</span> <strong>Business Dashboard</strong> - Real-time business insights</li>
+                <li><span class="icon">✔</span> <strong>Export Reports</strong> - Comprehensive report generation</li>
+                <li><span class="icon">✔</span> <strong>Customer Profiles</strong> - Detailed customer database</li>
+                <li><span class="icon">✔</span> <strong>POS & Receipt</strong> - Professional point of sale system</li>
+                <li><span class="icon">✔</span> <strong>Offline Support</strong> - Work without internet connection</li>
+            </ul>
+            
+            <div class="cta-container">
+                <p>Ready to get the most out of DeynCare?</p>
+                <a href="{{dashboardUrl}}" class="cta-button">Go to Dashboard</a>
+            </div>
+            
+            <p>If you have any questions about your subscription or need assistance, our support team is here to help at <a href="mailto:support@deyncare.com">support@deyncare.com</a>.</p>
+            
+            <div class="receipt-section">
+                <p>A receipt for your payment has been sent separately. You can also view your billing information in your account settings.</p>
+                <a href="{{accountUrl}}" class="text-link">View Account Settings</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 DeynCare. All rights reserved.</p>
+            <p>
+                <a href="{{privacyUrl}}">Privacy Policy</a> | 
+                <a href="{{termsUrl}}">Terms of Service</a> | 
+                <a href="{{unsubscribeUrl}}">Unsubscribe</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

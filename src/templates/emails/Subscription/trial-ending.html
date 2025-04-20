@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trial Ending Soon - DeynCare</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="https://yourwebsite.com/logo.png" alt="DeynCare Logo" class="logo">
+        </div>
+        
+        <div class="content">
+            <h1>Your Free Trial Is Ending Soon</h1>
+            
+            <p>Hello {{shopName}},</p>
+            
+            <div class="alert alert-warning">
+                <strong>Important:</strong> Your free trial will end in {{daysLeft}} days on {{trialEndsAt}}.
+            </div>
+            
+            <p>We hope you've enjoyed exploring DeynCare's features during your trial period:</p>
+            
+            <ul class="feature-list">
+                <li><span class="icon">✔</span> <strong>Debt Tracking</strong> - Organize and monitor outstanding debts</li>
+                <li><span class="icon">✔</span> <strong>Customer Payments</strong> - Record and track all payments</li>
+                <li><span class="icon">✔</span> <strong>SMS Reminders</strong> - Automatic payment reminders</li>
+                <li><span class="icon">✔</span> <strong>Smart Risk Score</strong> - AI-powered risk assessment</li>
+                <li><span class="icon">✔</span> <strong>Product & Sales System</strong> - Complete inventory management</li>
+                <li><span class="icon">✔</span> <strong>Business Dashboard</strong> - Real-time business insights</li>
+                <li><span class="icon">✔</span> <strong>Export Reports</strong> - Comprehensive report generation</li>
+                <li><span class="icon">✔</span> <strong>Customer Profiles</strong> - Detailed customer database</li>
+                <li><span class="icon">✔</span> <strong>POS & Receipt</strong> - Professional point of sale system</li>
+                <li><span class="icon">✔</span> <strong>Offline Support</strong> - Work without internet connection</li>
+            </ul>
+            
+            <div class="cta-container">
+                <p>Don't lose access to these powerful features!</p>
+                <a href="{{upgradeUrl}}" class="cta-button">Upgrade Now</a>
+            </div>
+            
+            <div class="pricing-section">
+                <h3>Choose Your Plan</h3>
+                <div class="pricing-table">
+                    <div class="price-column">
+                        <h4>Monthly</h4>
+                        <div class="price">$10<span>/month</span></div>
+                        <ul>
+                            <li>All features included</li>
+                            <li>Monthly billing</li>
+                            <li>Cancel anytime</li>
+                        </ul>
+                        <a href="{{upgradeMonthlyUrl}}" class="plan-button">Select Monthly</a>
+                    </div>
+                    <div class="price-column recommended">
+                        <div class="ribbon">BEST VALUE</div>
+                        <h4>Annual</h4>
+                        <div class="price">$8<span>/month</span></div>
+                        <ul>
+                            <li>All features included</li>
+                            <li>Save 20% annually</li>
+                            <li>Priority support</li>
+                        </ul>
+                        <a href="{{upgradeYearlyUrl}}" class="plan-button">Select Annual</a>
+                    </div>
+                </div>
+            </div>
+            
+            <p>Need help deciding? Reply to this email or contact our support team at <a href="mailto:support@deyncare.com">support@deyncare.com</a>.</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 DeynCare. All rights reserved.</p>
+            <p>
+                <a href="{{privacyUrl}}">Privacy Policy</a> | 
+                <a href="{{termsUrl}}">Terms of Service</a> | 
+                <a href="{{unsubscribeUrl}}">Unsubscribe</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

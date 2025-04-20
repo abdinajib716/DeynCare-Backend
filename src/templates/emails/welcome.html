@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to DeynCare</title>
+  <style>
+    /* Inlined styles for email client compatibility */
+    :root {
+      --primary-color: #2e86de;
+      --secondary-color: #0abde3;
+      --accent-color: #10ac84;
+      --text-color: #333333;
+      --text-muted: #666666;
+      --bg-light: #f7f7f7;
+      --bg-white: #ffffff;
+      --border-color: #eeeeee;
+    }
+    body {
+      font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333333;
+      margin: 0;
+      padding: 0;
+      background-color: #f7f7f7;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .email-header {
+      background-color: #2e86de;
+      background-image: linear-gradient(to right, #2e86de, #0abde3);
+      color: white;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .email-header h1 {
+      margin: 15px 0 0;
+      font-size: 28px;
+      font-weight: 600;
+    }
+    .email-content {
+      padding: 32px 24px;
+      background-color: #ffffff;
+    }
+    .email-greeting {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #333333;
+    }
+    .email-message {
+      font-size: 16px;
+      margin-bottom: 24px;
+      color: #333333;
+    }
+    .btn-container {
+      text-align: center;
+      margin: 30px 0;
+    }
+    .btn-primary {
+      display: inline-block;
+      background-color: #2e86de;
+      color: white !important;
+      text-decoration: none;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .shop-details {
+      background-color: #f7f7f7;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    .shop-details h3 {
+      color: #2e86de;
+      margin-top: 0;
+    }
+    .shop-details table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .shop-details table td {
+      padding: 8px 0;
+    }
+    .shop-details table td:first-child {
+      font-weight: 600;
+      width: 40%;
+    }
+    .features-list {
+      margin: 25px 0;
+    }
+    .feature-item {
+      display: flex;
+      margin-bottom: 15px;
+      align-items: flex-start;
+    }
+    .feature-icon {
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+      background-color: #10ac84;
+      border-radius: 50%;
+      color: white;
+      text-align: center;
+      line-height: 24px;
+      flex-shrink: 0;
+    }
+    .feature-text {
+      flex: 1;
+    }
+    .divider {
+      height: 1px;
+      background-color: #eeeeee;
+      margin: 25px 0;
+    }
+    .email-footer {
+      background-color: #f7f7f7;
+      padding: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: #999999;
+      border-top: 1px solid #eeeeee;
+    }
+    .social-links {
+      margin: 15px 0;
+    }
+    .footer-text {
+      margin: 10px 0;
+    }
+    @media only screen and (max-width: 480px) {
+      .email-header h1 {
+        font-size: 24px;
+      }
+      .email-content {
+        padding: 25px 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="email-header">
+      <h1>DeynCare</h1>
+    </div>
+    <div class="email-content">
+      <div class="email-greeting">
+        Hello {{fullName}},
+      </div>
+      <div class="email-message">
+        <p>Welcome to DeynCare! Your account has been successfully verified, and your shop has been created.</p>
+        <p>You now have access to our powerful debt management and POS system to help your business thrive.</p>
+      </div>
+      
+      <div class="shop-details">
+        <h3>Your Shop Details</h3>
+        <table>
+          <tr>
+            <td>Shop Name:</td>
+            <td>{{shopName}}</td>
+          </tr>
+          <tr>
+            <td>Shop ID:</td>
+            <td>{{shopId}}</td>
+          </tr>
+          <tr>
+            <td>Subscription:</td>
+            <td>{{planType}} Plan</td>
+          </tr>
+          <tr>
+            <td>Status:</td>
+            <td>{{shopStatus}}</td>
+          </tr>
+        </table>
+      </div>
+      
+      <div class="btn-container">
+        <a href="{{loginUrl}}" class="btn-primary">Log In to Your Account</a>
+      </div>
+      
+      <div class="features-list">
+        <h3>What You Can Do Now:</h3>
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          <div class="feature-text">
+            <strong>Manage Customers:</strong> Add and track customer information and credit history.
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          <div class="feature-text">
+            <strong>Record Debts:</strong> Keep accurate records of all customer debts and payment schedules.
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          <div class="feature-text">
+            <strong>Process Sales:</strong> Use our POS features to process and track all sales transactions.
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          <div class="feature-text">
+            <strong>Generate Reports:</strong> Get detailed insights into your business performance.
+          </div>
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="email-message">
+        <p>If you have any questions or need assistance, our support team is here to help. Just reply to this email, and we'll get back to you as soon as possible.</p>
+        <p>Best regards,<br>The DeynCare Team</p>
+      </div>
+    </div>
+    <div class="email-footer">
+      <div class="social-links">
+        <a href="#">Facebook</a> | 
+        <a href="#">Twitter</a> | 
+        <a href="#">Instagram</a>
+      </div>
+      <div class="footer-text">
+        © {{year}} DeynCare. All rights reserved.
+      </div>
+      <div class="footer-text">
+        You're receiving this email because you created an account with DeynCare.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

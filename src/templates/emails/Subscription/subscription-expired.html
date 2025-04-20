@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Expired - DeynCare</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="https://yourwebsite.com/logo.png" alt="DeynCare Logo" class="logo">
+        </div>
+        
+        <div class="content">
+            <h1>Your Subscription Has Expired</h1>
+            
+            <p>Hello {{shopName}},</p>
+            
+            <div class="alert alert-warning">
+                <strong>Notice:</strong> Your DeynCare subscription has expired.
+            </div>
+            
+            <div class="expiration-details">
+                <h3>Expiration Details</h3>
+                <table class="details-table">
+                    <tr>
+                        <td><strong>Plan:</strong></td>
+                        <td>{{planType}} Plan</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Expired On:</strong></td>
+                        <td>{{endDate}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data Retention:</strong></td>
+                        <td>Your data will be retained for {{gracePeriodDays}} days</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="limited-access">
+                <h3>Limited Access</h3>
+                <p>Your access to DeynCare services has been limited due to the subscription expiration. You can still access your basic account and view your historical data, but premium features are no longer available.</p>
+            </div>
+            
+            <div class="data-export">
+                <h3>Export Your Data</h3>
+                <p>We recommend exporting your data before the retention period ends. You can do this from your account settings.</p>
+                <a href="{{exportDataUrl}}" class="secondary-button">Export My Data</a>
+            </div>
+            
+            <div class="reactivation-section">
+                <h3>Reactivate Your Subscription</h3>
+                <p>To regain full access to all DeynCare features and continue managing your business efficiently, you can reactivate your subscription at any time.</p>
+                <a href="{{reactivateUrl}}" class="cta-button">Reactivate My Subscription</a>
+            </div>
+            
+            <p>If you prefer to choose a different plan:</p>
+            <div class="plan-options">
+                <a href="{{monthlyPlanUrl}}" class="plan-button monthly">Monthly Plan<span class="price">$10/month</span></a>
+                <a href="{{yearlyPlanUrl}}" class="plan-button yearly">Yearly Plan<span class="price">$8/month ($96/year)</span><span class="savings">Save 20%</span></a>
+            </div>
+            
+            <div class="contact-section">
+                <h3>Need Help?</h3>
+                <p>If you have any questions or need assistance, our support team is available to help you.</p>
+                <a href="mailto:support@deyncare.com" class="text-link">Contact Support</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 DeynCare. All rights reserved.</p>
+            <p>
+                <a href="{{privacyUrl}}">Privacy Policy</a> | 
+                <a href="{{termsUrl}}">Terms of Service</a> | 
+                <a href="{{unsubscribeUrl}}">Unsubscribe</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

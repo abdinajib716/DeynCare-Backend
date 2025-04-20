@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Your DeynCare Account</title>
+  <style>
+    /* Inlined styles for email client compatibility */
+    :root {
+      --primary-color: #2e86de;
+      --secondary-color: #0abde3;
+      --text-color: #333333;
+      --text-muted: #666666;
+      --bg-light: #f7f7f7;
+      --bg-white: #ffffff;
+      --border-color: #eeeeee;
+    }
+    body {
+      font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333333;
+      margin: 0;
+      padding: 0;
+      background-color: #f7f7f7;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .email-header {
+      background-color: #2e86de;
+      background-image: linear-gradient(to right, #2e86de, #0abde3);
+      color: white;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .email-header img.logo {
+      max-width: 180px;
+      height: auto;
+    }
+    .email-header h1 {
+      margin: 15px 0 0;
+      font-size: 28px;
+      font-weight: 600;
+    }
+    .email-content {
+      padding: 32px 24px;
+      background-color: #ffffff;
+    }
+    .email-greeting {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #333333;
+    }
+    .email-message {
+      font-size: 16px;
+      margin-bottom: 24px;
+      color: #333333;
+    }
+    .verification-code {
+      text-align: center;
+      margin: 30px 0;
+    }
+    .code-digits {
+      font-family: 'Courier New', monospace;
+      font-size: 32px;
+      letter-spacing: 6px;
+      font-weight: 700;
+      background-color: #f7f7f7;
+      color: #333333;
+      padding: 15px 20px;
+      border-radius: 8px;
+      display: inline-block;
+      margin: 0 auto;
+    }
+    .info-block {
+      background-color: #f7f7f7;
+      border-left: 4px solid #2e86de;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .email-footer {
+      background-color: #f7f7f7;
+      padding: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: #999999;
+      border-top: 1px solid #eeeeee;
+    }
+    .social-links {
+      margin: 15px 0;
+    }
+    .social-links a {
+      display: inline-block;
+      margin: 0 8px;
+      color: #2e86de;
+      text-decoration: none;
+    }
+    .footer-text {
+      margin: 10px 0;
+    }
+    @media only screen and (max-width: 480px) {
+      .email-header h1 {
+        font-size: 24px;
+      }
+      .email-content {
+        padding: 25px 15px;
+      }
+      .code-digits {
+        font-size: 28px;
+        letter-spacing: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="email-header">
+      <h1>DeynCare</h1>
+    </div>
+    <div class="email-content">
+      <div class="email-greeting">
+        Hello {{fullName}},
+      </div>
+      <div class="email-message">
+        <p>Thank you for signing up for DeynCare. To verify your email address and activate your account, please use the verification code below.</p>
+      </div>
+      <div class="verification-code">
+        <div class="code-digits">{{verificationCode}}</div>
+      </div>
+      <div class="email-message">
+        <p>This code will expire in 24 hours. If you did not sign up for a DeynCare account, please ignore this email.</p>
+      </div>
+      <div class="info-block">
+        <p><strong>What's Next?</strong></p>
+        <p>After verifying your email, you'll be able to set up your shop and start using DeynCare's powerful debt management tools.</p>
+      </div>
+    </div>
+    <div class="email-footer">
+      <div class="footer-text">
+        © {{year}} DeynCare. All rights reserved.
+      </div>
+      <div class="footer-text">
+        This is an automated message, please do not reply.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

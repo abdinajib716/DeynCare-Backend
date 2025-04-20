@@ -1,0 +1,86 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build and dist directories
+/dist
+/build
+/out
+
+# Code coverage
+coverage/
+.nyc_output/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Editor directories and files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Temporary directories and files
+tmp/
+temp/
+*.tmp
+*.bak
+.cache/
+
+# MongoDB data directory (if used locally)
+/data/db
+
+# Application specific
+uploads/*
+!uploads/.gitkeep
+
+# Test files
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Deployments
+.netlify/
+.serverless/
+.vercel/
+
+# Debug files
+.node-version
+.nvmrc
+nodemon.json
+.nodemonignore
+
+# Documentation specific
+/docs-build/
+/jsdoc/
+
+# Security keys (just in case)
+*.pem
+*.key
+*.cert
+
+# Local configuration
+config/local*

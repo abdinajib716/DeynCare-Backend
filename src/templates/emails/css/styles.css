@@ -1,0 +1,203 @@
+/* DeynCare Email Templates - Main Stylesheet
+ * This stylesheet provides consistent styling for all email templates
+ * Compatible with most email clients including Outlook, Gmail, and mobile devices
+ */
+
+/* Base font and colors */
+:root {
+  --primary-color: #2e86de;
+  --secondary-color: #0abde3;
+  --accent-color: #10ac84;
+  --warning-color: #ff9f43;
+  --danger-color: #ee5253;
+  --text-color: #333333;
+  --text-muted: #666666;
+  --text-light: #999999;
+  --bg-light: #f7f7f7;
+  --bg-white: #ffffff;
+  --border-color: #eeeeee;
+}
+
+/* Email container */
+.email-container {
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: var(--bg-white);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+/* Header styles */
+.email-header {
+  background-color: var(--primary-color);
+  background-image: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+  color: white;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.email-header img.logo {
+  max-width: 180px;
+  height: auto;
+}
+
+.email-header h1 {
+  margin: 15px 0 0;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+/* Content area */
+.email-content {
+  padding: 32px 24px;
+  background-color: var(--bg-white);
+}
+
+.email-greeting {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: var(--text-color);
+}
+
+.email-message {
+  font-size: 16px;
+  margin-bottom: 24px;
+  color: var(--text-color);
+}
+
+/* Verification code */
+.verification-code {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.code-digits {
+  font-family: 'Courier New', monospace;
+  font-size: 32px;
+  letter-spacing: 6px;
+  font-weight: 700;
+  background-color: var(--bg-light);
+  color: var(--text-color);
+  padding: 15px 20px;
+  border-radius: 8px;
+  display: inline-block;
+  margin: 0 auto;
+}
+
+/* Call to action buttons */
+.btn-container {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.btn-primary {
+  display: inline-block;
+  background-color: var(--primary-color);
+  color: white !important;
+  text-decoration: none;
+  padding: 12px 30px;
+  border-radius: 50px;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary-color);
+}
+
+/* Information blocks */
+.info-block {
+  background-color: var(--bg-light);
+  border-left: 4px solid var(--primary-color);
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 4px;
+}
+
+.warning-block {
+  background-color: #fff8e6;
+  border-left: 4px solid var(--warning-color);
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 4px;
+}
+
+/* Dividers */
+.divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 25px 0;
+}
+
+/* Shop details section */
+.shop-details {
+  background-color: var(--bg-light);
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.shop-details h3 {
+  color: var(--primary-color);
+  margin-top: 0;
+}
+
+.shop-details table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.shop-details table td {
+  padding: 8px 0;
+}
+
+.shop-details table td:first-child {
+  font-weight: 600;
+  width: 40%;
+}
+
+/* Footer styles */
+.email-footer {
+  background-color: var(--bg-light);
+  padding: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-light);
+  border-top: 1px solid var(--border-color);
+}
+
+.social-links {
+  margin: 15px 0;
+}
+
+.social-links a {
+  display: inline-block;
+  margin: 0 8px;
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.footer-text {
+  margin: 10px 0;
+}
+
+/* Responsive adjustments */
+@media only screen and (max-width: 480px) {
+  .email-header h1 {
+    font-size: 24px;
+  }
+  
+  .email-content {
+    padding: 25px 15px;
+  }
+  
+  .code-digits {
+    font-size: 28px;
+    letter-spacing: 5px;
+  }
+}
