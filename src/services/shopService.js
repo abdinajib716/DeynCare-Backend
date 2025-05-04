@@ -82,35 +82,67 @@ const ShopService = {
         finalLogoUrl = logoUrl.url || '';
       }
       
-      // Validate and process subscription using SubscriptionHelper
-      const subscriptionValidation = SubscriptionHelper.validateSubscription(subscription);
+      // Validate subscription data - ensure we have a valid object to work with
+      const subscriptionData = subscription || {};
+      const planType = subscriptionData.planType || 'trial';
+      const paymentMethod = subscriptionData.paymentMethod || 'offline';
+      const initialPaid = subscriptionData.initialPaid || false;
+      const paymentDetails = subscriptionData.paymentDetails || null;
+      const discountDetails = subscriptionData.discountDetails || null;
+      
+      const subscriptionValidation = SubscriptionHelper.validateSubscriptionData({
+        planType,
+        paymentMethod,
+        initialPaid,
+        paymentDetails
+      });
       
       if (!subscriptionValidation.isValid) {
-        logWarning(`Subscription validation issues: ${subscriptionValidation.errors.join(', ')}`, 'ShopService');
+        throw new AppError(
+          `Invalid subscription data: ${subscriptionValidation.errors.join(', ')}`,
+          400,
+          'invalid_subscription_data'
+        );
       }
       
-      // Map payment method to ensure consistency with payment model
-      let paymentMethod = subscriptionValidation.sanitizedData.paymentMethod || 'offline';
-      
       // Ensure payment method is valid and consistent with payment model
+      let finalPaymentMethod = paymentMethod || 'offline';
       const validPaymentMethods = ['Cash', 'EVC Plus', 'Bank Transfer', 'Mobile Money', 'Check', 'Card', 'Other', 'offline'];
-      if (!validPaymentMethods.includes(paymentMethod)) {
+      
+      if (!validPaymentMethods.includes(finalPaymentMethod)) {
         // Default to offline if not valid
-        paymentMethod = 'offline';
+        finalPaymentMethod = 'offline';
         logWarning(`Invalid payment method provided, defaulting to 'offline'`, 'ShopService');
       }
       
       // Get default subscription with validated data
       const finalSubscription = SubscriptionHelper.getDefaultSubscription({
-        planType: subscriptionValidation.sanitizedData.planType || 'trial',
-        paymentMethod: paymentMethod,
-        initialPaid: subscriptionValidation.sanitizedData.initialPaid || false,
-        paymentDetails: subscriptionValidation.sanitizedData.paymentDetails || null
+        planType: planType || 'trial',
+        paymentMethod: finalPaymentMethod,
+        initialPaid: initialPaid || false,
+        paymentDetails: paymentDetails || null
       });
+
+      // Add discount information if provided
+      if (discountDetails && initialPaid) {
+        finalSubscription.pricing.discount = {
+          active: true,
+          code: discountDetails.code,
+          discountId: discountDetails.discountId,
+          amount: discountDetails.discountAmount,
+          originalAmount: discountDetails.originalAmount || finalSubscription.pricing.price,
+          type: discountDetails.type,
+          value: discountDetails.value,
+          percentage: discountDetails.type === 'percentage',
+          appliedAt: new Date()
+        };
+        
+        logInfo(`Applied discount code ${discountDetails.code} to shop subscription: ${discountDetails.discountAmount}`, 'ShopService');
+      }
 
       // Set shop status based on plan type - trial plans should be immediately active
       // For trial plans, payment method is stored for future use but doesn't affect activation
-      const shopPlanType = subscriptionValidation.sanitizedData.planType || 'trial';
+      const shopPlanType = planType || 'trial';
       let shopStatus = status;
       
       if (shopPlanType === 'trial') {

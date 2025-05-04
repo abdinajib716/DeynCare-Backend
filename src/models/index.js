@@ -14,6 +14,7 @@ const File = require('./file.model');
 const ShopSetting = require('./shopSetting.model');
 const FinancialSnapshot = require('./financialSnapshot.model');
 const Report = require('./report.model');
+const DiscountCode = require('./discountCode.model');
 
 module.exports = {
   User,
@@ -31,5 +32,6 @@ module.exports = {
   File,
   ShopSetting,
   FinancialSnapshot,
-  Report
+  Report,
+  DiscountCode
 };

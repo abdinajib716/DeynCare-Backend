@@ -128,15 +128,34 @@ const subscriptionSchema = new mongoose.Schema({
         type: String,
         trim: true
       },
+      discountId: {
+        type: String,
+        trim: true
+      },
       amount: {
         type: Number,
         default: 0
+      },
+      originalAmount: {
+        type: Number
+      },
+      type: {
+        type: String,
+        enum: ['fixed', 'percentage'],
+        default: 'percentage'
+      },
+      value: {
+        type: Number
       },
       percentage: {
         type: Boolean,
         default: true
       },
-      expiresAt: Date
+      expiresAt: Date,
+      appliedAt: {
+        type: Date,
+        default: Date.now
+      }
     }
   },
   status: {
@@ -149,7 +168,7 @@ const subscriptionSchema = new mongoose.Schema({
   payment: {
     method: {
       type: String,
-      enum: ['credit_card', 'bank_transfer', 'mobile_money', 'offline', 'free'],
+      enum: ['offline', 'evc_plus', 'free'],
       default: function() {
         return this.plan.type === 'trial' ? 'free' : 'offline';
       }
@@ -322,10 +341,10 @@ subscriptionSchema.virtual('totalPrice').get(function() {
   
   // Apply discount if active
   if (this.pricing.discount && this.pricing.discount.active) {
-    if (this.pricing.discount.percentage) {
-      price -= (price * this.pricing.discount.amount / 100);
-    } else {
+    if (this.pricing.discount.type === 'fixed') {
       price -= this.pricing.discount.amount;
+    } else if (this.pricing.discount.type === 'percentage') {
+      price -= (price * this.pricing.discount.value / 100);
     }
   }
   

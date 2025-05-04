@@ -76,7 +76,7 @@ router.post(
 
 // Pay subscription using EVC Plus
 router.post(
-  '/pay-evc',
+  '/evc_plus',
   validate(subscriptionSchemas.payWithEvc),
   subscriptionController.payWithEvc
 );

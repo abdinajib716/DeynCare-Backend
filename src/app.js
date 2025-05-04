@@ -12,6 +12,9 @@ const SchedulerService = require('./services/schedulerService');
 const authRoutes = require('./routes/authRoutes');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
+const discountRoutes = require('./routes/discountRoutes');
+const userRoutes = require('./routes/userRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 // Import other routes as they are created
 
 dotenv.config();
@@ -37,6 +40,10 @@ applyRateLimiters(app);
 app.use('/api/auth', authRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/discounts', discountRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/reports', reportRoutes);
+console.log('Report routes registered successfully');
 // Add other routes as they are created
 
 app.get('/api/health', (req, res) => {

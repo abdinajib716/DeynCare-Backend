@@ -30,7 +30,8 @@ exports.authenticate = async (req, res, next) => {
     const user = await User.findOne({ 
       userId: decoded.userId,
       status: 'active',
-      isDeleted: false
+      isDeleted: false,
+      isSuspended: { $ne: true } // Explicitly exclude suspended users
     });
     
     if (!user) {
@@ -55,21 +56,51 @@ exports.authenticate = async (req, res, next) => {
 
 /**
  * Authorization middleware for role-based access control
- * @param {...string} roles - Allowed roles
+ * @param {string|string[]} roles - Allowed roles (string or array of strings)
  */
-exports.authorize = (...roles) => {
+exports.authorize = (roles) => {
   return (req, res, next) => {
-    if (!req.user) {
-      return next(new AppError('User not authenticated', 401, 'auth_required'));
+    try {
+      // Check if user is authenticated
+      if (!req.user) {
+        return next(new AppError('User not authenticated', 401, 'auth_required'));
+      }
+
+      // Safely get user role with validation
+      const userRole = req.user.role;
+      if (typeof userRole !== 'string') {
+        console.error(`Invalid role type: ${typeof userRole}`, req.user);
+        return next(new AppError('User has invalid role format', 500, 'server_error'));
+      }
+      
+      // Ensure roles is an array
+      const allowedRoles = Array.isArray(roles) ? roles : [roles];
+      
+      // Convert user role and required roles to lowercase for case-insensitive comparison
+      const normalizedUserRole = userRole.toLowerCase();
+      const normalizedRoles = allowedRoles.map(role => 
+        typeof role === 'string' ? role.toLowerCase() : ''
+      );
+      
+      // Debug logging
+      console.log(`Authorization check - User role: ${userRole}, Required roles: ${JSON.stringify(allowedRoles)}`);
+      console.log(`Normalized user role: ${normalizedUserRole}, Normalized allowed roles: ${JSON.stringify(normalizedRoles)}`);
+      
+      // Perform case-insensitive role check
+      const hasAccess = normalizedRoles.includes(normalizedUserRole);
+      console.log(`Access granted: ${hasAccess}`);
+      
+      if (!hasAccess) {
+        logWarning(`Access denied for ${req.user.userId} (${userRole}) - Required roles: ${allowedRoles.join(', ')}`, 'AuthMiddleware');
+        return next(new AppError('You do not have permission to perform this action', 403, 'forbidden'));
+      }
+      
+      logAuth(`Authorized access for ${req.user.userId} (${userRole})`, 'AuthMiddleware');
+      next();
+    } catch (error) {
+      console.error('Error in role authorization:', error);
+      return next(new AppError('Server error during authorization', 500, 'server_error'));
     }
-    
-    if (!roles.includes(req.user.role)) {
-      logWarning(`Access denied for ${req.user.userId} (${req.user.role}) - Required roles: ${roles.join(', ')}`, 'AuthMiddleware');
-      return next(new AppError('You do not have permission to perform this action', 403, 'forbidden'));
-    }
-    
-    logAuth(`Authorized access for ${req.user.userId} (${req.user.role})`, 'AuthMiddleware');
-    next();
   };
 };
 

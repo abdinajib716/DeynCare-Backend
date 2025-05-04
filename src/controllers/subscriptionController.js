@@ -170,7 +170,7 @@ const SubscriptionController = {
       const shop = await ShopService.getShopById(shopId);
       
       // Send notification email to shop owner
-      await EmailService.sendSubscriptionCreatedEmail({
+      await EmailService.subscription.sendSubscriptionCreatedEmail({
         email: shop.email,
         shopName: shop.shopName,
         planType,
@@ -232,7 +232,7 @@ const SubscriptionController = {
       const shop = await ShopService.getShopById(shopId);
       
       // Send upgrade confirmation email
-      await EmailService.sendSubscriptionUpgradedEmail({
+      await EmailService.subscription.sendSubscriptionUpgradedEmail({
         email: shop.email,
         shopName: shop.shopName,
         planType,
@@ -295,7 +295,7 @@ const SubscriptionController = {
       const shop = await ShopService.getShopById(shopId);
       
       // Send plan change confirmation email
-      await EmailService.sendSubscriptionChangedEmail({
+      await EmailService.subscription.sendSubscriptionChangedEmail({
         email: shop.email,
         shopName: shop.shopName,
         previousPlan: subscription.plan.type,
@@ -328,15 +328,13 @@ const SubscriptionController = {
    */
   recordPayment: async (req, res, next) => {
     try {
-      const { 
-        transactionId, 
-        method,
-        amount,
-        receiptUrl,
-        extend = true
-      } = req.validatedData || req.body;
+      const { amount, transactionId, paymentMethod } = req.body;
+      const { shopId, userId } = req.user;
       
-      const { shopId, userId, role } = req.user;
+      // Validate payment method
+      if (paymentMethod !== 'offline' && paymentMethod !== 'evc_plus') {
+        return next(new AppError('Invalid payment method', 400, 'invalid_payment_method'));
+      }
       
       if (!shopId) {
         return next(new AppError('Shop association required', 400, 'shop_required'));
@@ -350,14 +348,13 @@ const SubscriptionController = {
         subscription.subscriptionId,
         {
           transactionId,
-          method,
+          method: paymentMethod,
           amount,
-          receiptUrl,
-          extend
+          extend: true
         },
         {
           actorId: userId,
-          actorRole: role
+          actorRole: req.user.role
         }
       );
       
@@ -365,12 +362,12 @@ const SubscriptionController = {
       const shop = await ShopService.getShopById(shopId);
       
       // Send payment confirmation email
-      await EmailService.sendPaymentConfirmationEmail({
+      await EmailService.shop.sendPaymentConfirmationEmail({
         email: shop.email,
         shopName: shop.shopName,
         amount,
         transactionId,
-        paymentMethod: method,
+        paymentMethod,
         endDate: updatedSubscription.dates.endDate
       });
       
@@ -422,7 +419,7 @@ const SubscriptionController = {
 
       // Send cancellation email
       if (user && user.email) {
-        await EmailService.sendSubscriptionCanceledEmail({
+        await EmailService.subscription.sendSubscriptionCanceledEmail({
           email: user.email,
           shopName: shop.name,
           endDate: canceledSubscription.endDate,
@@ -479,7 +476,7 @@ const SubscriptionController = {
 
       // Send auto-renewal update email
       if (user && user.email) {
-        await EmailService.sendAutoRenewalUpdatedEmail({
+        await EmailService.subscription.sendAutoRenewalUpdatedEmail({
           email: user.email,
           shopName: shop.name,
           autoRenew,
@@ -539,7 +536,7 @@ const SubscriptionController = {
 
       // Send renewal confirmation email
       if (user && user.email) {
-        await EmailService.sendSubscriptionRenewalEmail({
+        await EmailService.subscription.sendSubscriptionRenewalEmail({
           email: user.email,
           shopName: shop.name,
           endDate: renewedSubscription.endDate,
@@ -616,7 +613,7 @@ const SubscriptionController = {
 
       // Send extension email
       if (user && user.email) {
-        await EmailService.sendSubscriptionExtendedEmail({
+        await EmailService.subscription.sendSubscriptionExtendedEmail({
           email: user.email,
           shopName: shop.name,
           days,
@@ -800,7 +797,7 @@ const SubscriptionController = {
         paymentContext: 'subscription',
         subscriptionId: subscription.subscriptionId,
         amount,
-        method: 'EVC Plus',
+        method: 'evc_plus',
         notes: `Subscription ${planType || 'plan'} payment`,
         status: 'pending',
         recordedBy: req.user.userId,
@@ -857,7 +854,7 @@ const SubscriptionController = {
             subscriptionId, 
             { 
               planType: planType || 'monthly',
-              paymentMethod: 'EVC Plus',
+              paymentMethod: 'evc_plus',
               transactionId: paymentResult.transactionId
             },
             {
@@ -871,7 +868,7 @@ const SubscriptionController = {
             subscriptionId,
             {
               transactionId: paymentResult.transactionId,
-              method: 'EVC Plus',
+              method: 'evc_plus',
               amount,
               extend: true
             },
@@ -884,12 +881,12 @@ const SubscriptionController = {
         
         // Send email notification
         try {
-          await EmailService.sendPaymentConfirmationEmail({
+          await EmailService.shop.sendPaymentConfirmationEmail({
             email: shop.owner?.email || req.user.email,
             shopName: shop.name,
             amount,
             paymentDate: new Date(),
-            method: 'EVC Plus',
+            method: 'evc_plus',
             referenceNumber: paymentResult.transactionId,
             planType: updatedSubscription.plan.type,
             endDate: updatedSubscription.dates.endDate
@@ -943,15 +940,13 @@ const SubscriptionController = {
    */
   submitOfflinePayment: async (req, res, next) => {
     try {
-      const {
-        subscriptionId,
-        payerName,
-        payerPhone,
-        amount,
-        method,
-        notes,
-        planType
-      } = req.body;
+      const { subscriptionId, amount, method, payerName, payerPhone, notes, planType } = req.body;
+      const { userId, shopId } = req.user;
+      
+      // Validate method is Cash
+      if (method !== 'Cash') {
+        return next(new AppError('Only Cash payments are accepted for offline payments', 400));
+      }
       
       // Validate required fields
       if (!subscriptionId) {
@@ -960,16 +955,6 @@ const SubscriptionController = {
       
       if (!amount || amount <= 0) {
         throw new AppError('Valid amount is required', 400, 'invalid_amount');
-      }
-      
-      if (!method) {
-        throw new AppError('Payment method is required', 400, 'missing_method');
-      }
-      
-      // Validate payment method
-      const allowedMethods = ['Cash', 'Bank Transfer', 'Mobile Money', 'Check', 'Other'];
-      if (!allowedMethods.includes(method)) {
-        throw new AppError(`Payment method must be one of: ${allowedMethods.join(', ')}`, 400, 'invalid_payment_method');
       }
       
       // Check if file was uploaded
@@ -1010,7 +995,7 @@ const SubscriptionController = {
         paymentContext: 'subscription',
         subscriptionId: subscription.subscriptionId,
         amount,
-        method,
+        method: 'offline',
         notes: notes || `Offline ${method} payment for ${planType || 'subscription'} plan`,
         status: 'pending',
         isConfirmed: false,
@@ -1031,7 +1016,7 @@ const SubscriptionController = {
           subscriptionId,
           {
             planType: planType || 'monthly',
-            paymentMethod: method,
+            paymentMethod: 'offline',
             paymentStatus: 'pending',
             pendingPaymentId: paymentId
           },
@@ -1046,7 +1031,7 @@ const SubscriptionController = {
           subscriptionId,
           {
             transactionId: paymentId,
-            method,
+            method: 'offline',
             amount,
             paymentStatus: 'pending',
             proofFileId: fileMetadata.fileId
@@ -1059,11 +1044,11 @@ const SubscriptionController = {
       
       // Send notification to super admin
       try {
-        await EmailService.sendPaymentVerificationRequest({
+        await EmailService.shop.sendPaymentVerificationRequest({
           subscriptionId,
           shopName: shop.name,
           amount,
-          paymentMethod: method,
+          paymentMethod: 'offline',
           payerName: payerName || shop.owner?.fullName || shop.name,
           paymentId,
           proofFileId: fileMetadata.fileId,
@@ -1152,7 +1137,7 @@ const SubscriptionController = {
           const shop = await ShopService.getShopById(payment.shopId);
           
           if (shop) {
-            await EmailService.sendPaymentConfirmationEmail({
+            await EmailService.shop.sendPaymentConfirmationEmail({
               email: shop.owner?.email,
               shopName: shop.name,
               amount: payment.amount,
@@ -1194,7 +1179,7 @@ const SubscriptionController = {
           const shop = await ShopService.getShopById(payment.shopId);
           
           if (shop) {
-            await EmailService.sendPaymentRejectionEmail({
+            await EmailService.shop.sendPaymentRejectionEmail({
               email: shop.owner?.email,
               shopName: shop.name,
               amount: payment.amount,

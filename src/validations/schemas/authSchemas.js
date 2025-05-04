@@ -49,6 +49,10 @@ const authSchemas = {
     registeredBy: Joi.string().valid('self', 'superAdmin').default('self'),
     paymentMethod: Joi.string().valid('Cash', 'EVC Plus', 'Bank Transfer', 'Mobile Money', 'Check', 'Card', 'Other', 'offline').default('offline'),
     initialPaid: Joi.boolean().default(false),
+    discountCode: Joi.string().trim().optional()
+      .messages({
+        'string.empty': 'Discount code cannot be empty if provided'
+      }),
     
     // Payment details (conditionally required if initialPaid is true)
     paymentDetails: patterns.object.paymentDetails.optional()

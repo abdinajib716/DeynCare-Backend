@@ -70,7 +70,7 @@ const processTrialReminders = async () => {
         const daysLeft = Math.ceil((new Date(trial.endDate) - new Date()) / (1000 * 60 * 60 * 24));
         
         // Send reminder email
-        await EmailService.sendTrialEndingReminderEmail({
+        await EmailService.subscription.sendTrialEndingReminderEmail({
           email: shop.email,
           shopName: shop.name,
           trialEndsAt: trial.endDate,
@@ -126,7 +126,7 @@ const processExpiryReminders = async () => {
         const daysLeft = Math.ceil((new Date(subscription.endDate) - new Date()) / (1000 * 60 * 60 * 24));
         
         // Send reminder email
-        await EmailService.sendSubscriptionExpiryReminderEmail({
+        await EmailService.subscription.sendSubscriptionExpiryReminderEmail({
           email: shop.email,
           shopName: shop.name,
           endDate: subscription.endDate,
@@ -196,7 +196,7 @@ const processAutoRenewals = async () => {
         );
         
         // Send renewal confirmation email
-        await EmailService.sendSubscriptionRenewalEmail({
+        await EmailService.subscription.sendSubscriptionRenewalEmail({
           email: shop.email,
           shopName: shop.name,
           endDate: renewedSubscription.endDate,
@@ -257,7 +257,7 @@ const processExpiredDeactivation = async () => {
         );
         
         // Send expiration notification email
-        await EmailService.sendSubscriptionExpiredEmail({
+        await EmailService.subscription.sendSubscriptionExpiredEmail({
           email: shop.email,
           shopName: shop.name,
           endDate: subscription.endDate,

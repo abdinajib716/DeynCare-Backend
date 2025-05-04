@@ -4,6 +4,7 @@
  */
 const { Payment, Shop, Subscription } = require('../models');
 const EmailService = require('./emailService');
+const DiscountService = require('./discountService');
 const { 
   AppError, 
   logInfo, 
@@ -34,6 +35,37 @@ const PaymentService = {
       
       if (paymentData.paymentContext === 'pos' && !paymentData.posOrderId) {
         throw new AppError('POS Order ID is required for POS payments', 400, 'missing_pos_order_id');
+      }
+      
+      // Apply discount code if provided
+      if (paymentData.discountCode) {
+        const discountDetails = await PaymentService.applyDiscountToPayment(
+          paymentData.discountCode,
+          paymentData.amount,
+          paymentData.paymentContext,
+          paymentData.userId,
+          paymentData.shopId
+        );
+        
+        // Update payment data with discount information
+        paymentData.originalAmount = paymentData.amount;
+        paymentData.amount = discountDetails.finalAmount;
+        paymentData.discountAmount = discountDetails.discountAmount;
+        paymentData.discountId = discountDetails.discountId;
+        
+        // Add discount details to metadata if it exists, or create it
+        if (!paymentData.metadata) {
+          paymentData.metadata = {};
+        }
+        
+        paymentData.metadata.discount = {
+          code: discountDetails.code,
+          type: discountDetails.type,
+          value: discountDetails.value,
+          description: discountDetails.description
+        };
+        
+        logInfo(`Applied discount code ${discountDetails.code} to payment, saving $${discountDetails.discountAmount}`, 'PaymentService');
       }
       
       // Create the payment
@@ -325,7 +357,7 @@ const PaymentService = {
         
         if (subscription) {
           // Send email with subscription details
-          await EmailService.sendPaymentConfirmationEmail({
+          await EmailService.shop.sendPaymentConfirmationEmail({
             email: shop.owner.email,
             shopName: shop.name,
             amount: payment.amount,
@@ -343,7 +375,7 @@ const PaymentService = {
       }
       
       // For non-subscription payments or if subscription not found
-      await EmailService.sendPaymentConfirmationEmail({
+      await EmailService.shop.sendPaymentConfirmationEmail({
         email: shop.owner.email,
         shopName: shop.name,
         amount: payment.amount,
@@ -359,7 +391,55 @@ const PaymentService = {
       logError(`Failed to send payment confirmation email: ${error.message}`, 'PaymentService', error);
       throw new AppError('Failed to send payment confirmation email', 500, 'email_sending_error');
     }
-  }
+  },
+  
+  /**
+   * Apply a discount code to a payment
+   * @param {String} discountCode - Discount code
+   * @param {Number} amount - Payment amount
+   * @param {String} context - Payment context (subscription, pos, debt)
+   * @param {String} userId - User ID
+   * @param {String} shopId - Shop ID
+   * @returns {Promise<Object>} Discount details including final amount
+   */
+  applyDiscountToPayment: async (discountCode, amount, context, userId, shopId) => {
+    try {
+      if (!discountCode) {
+        return {
+          discountId: null,
+          code: null,
+          discountAmount: 0,
+          finalAmount: amount,
+          applied: false
+        };
+      }
+      
+      // Use the discount service to apply the discount
+      const discountDetails = await DiscountService.applyDiscountCode(
+        discountCode,
+        amount,
+        context,
+        userId,
+        shopId
+      );
+      
+      logSuccess(`Applied discount code ${discountCode} to payment for ${context}`, 'PaymentService');
+      return discountDetails;
+    } catch (error) {
+      // If there's an issue with the discount code, log it but don't fail the payment
+      logError(`Failed to apply discount code ${discountCode}: ${error.message}`, 'PaymentService', error);
+      
+      // Return default values with no discount
+      return {
+        discountId: null,
+        code: discountCode, // Include the code so we know what failed
+        discountAmount: 0,
+        finalAmount: amount,
+        applied: false,
+        error: error.message
+      };
+    }
+  },
 };
 
 module.exports = PaymentService;

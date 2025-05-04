@@ -19,7 +19,7 @@ const subscriptionSchemas = {
       .messages({
         'any.only': 'Plan type must be one of: trial, monthly, yearly'
       }),
-    paymentMethod: Joi.string().valid('offline', 'online', 'evc', 'bank', 'mobile_money', 'credit_card')
+    paymentMethod: Joi.string().valid('offline', 'evc_plus', 'free')
       .when('planType', {
         is: Joi.string().valid('monthly', 'yearly'),
         then: Joi.required(),
@@ -50,7 +50,7 @@ const subscriptionSchemas = {
         'any.only': 'Plan type must be either monthly or yearly',
         'any.required': 'Plan type is required'
       }),
-    paymentMethod: Joi.string().valid('offline', 'online', 'evc', 'bank', 'mobile_money', 'credit_card').required()
+    paymentMethod: Joi.string().valid('offline', 'evc_plus').required()
       .messages({
         'any.required': 'Payment method is required'
       }),
@@ -79,7 +79,7 @@ const subscriptionSchemas = {
       .messages({
         'any.required': 'Transaction ID is required'
       }),
-    paymentMethod: Joi.string().valid('offline', 'online', 'evc', 'bank', 'mobile_money', 'credit_card').required()
+    paymentMethod: Joi.string().valid('offline', 'evc_plus').required()
       .messages({
         'any.required': 'Payment method is required'
       }),
@@ -108,7 +108,7 @@ const subscriptionSchemas = {
 
   // Renew a subscription
   renewSubscription: Joi.object({
-    paymentMethod: Joi.string().valid('offline', 'online', 'evc', 'bank', 'mobile_money', 'credit_card').required()
+    paymentMethod: Joi.string().valid('offline', 'evc_plus').required()
       .messages({
         'any.required': 'Payment method is required'
       }),
@@ -191,11 +191,11 @@ const subscriptionSchemas = {
         'number.greater': 'Amount must be greater than 0',
         'any.required': 'Amount is required'
       }),
-    method: Joi.string().valid('Cash', 'Bank Transfer', 'Mobile Money', 'Check', 'Other').required()
+    method: Joi.string().valid('Cash').required()
       .messages({
         'string.empty': 'Payment method is required',
         'any.required': 'Payment method is required',
-        'any.only': 'Payment method must be one of: Cash, Bank Transfer, Mobile Money, Check, Other'
+        'any.only': 'Payment method must be Cash'
       }),
     payerName: Joi.string().trim()
       .messages({

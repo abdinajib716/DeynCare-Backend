@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const mongoosePaginate = require('mongoose-paginate-v2');
 
 const userSchema = new mongoose.Schema({
   userId: {
@@ -169,6 +170,9 @@ userSchema.index({ shopId: 1, role: 1 });
 userSchema.index({ email: 1 });
 userSchema.index({ status: 1 });
 userSchema.index({ lastLoginAt: 1 });
+
+// Apply the pagination plugin
+userSchema.plugin(mongoosePaginate);
 
 // Password hashing middleware
 userSchema.pre('save', async function(next) {

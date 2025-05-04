@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Delivery - DeynCare</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="https://yourwebsite.com/logo.png" alt="DeynCare Logo" class="logo">
+        </div>
+        
+        <div class="content">
+            <h1>{{reportTitle}}</h1>
+            
+            <p>Hello,</p>
+            
+            <div class="alert alert-info">
+                <strong>Report Delivery:</strong> The requested report has been attached to this email.
+            </div>
+            
+            {{#if message}}
+            <div class="message-box">
+                <h3>Message</h3>
+                <p>{{message}}</p>
+            </div>
+            {{/if}}
+            
+            <div class="report-details">
+                <h3>Report Details</h3>
+                <table class="details-table">
+                    <tr>
+                        <td><strong>Report Title:</strong></td>
+                        <td>{{reportTitle}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Report Type:</strong></td>
+                        <td>{{reportType}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Generated On:</strong></td>
+                        <td>{{generatedAt}}</td>
+                    </tr>
+                    {{#if shopName}}
+                    <tr>
+                        <td><strong>Generated For:</strong></td>
+                        <td>{{shopName}}</td>
+                    </tr>
+                    {{/if}}
+                </table>
+            </div>
+            
+            <div class="instructions">
+                <h3>Instructions</h3>
+                <ul>
+                    <li>The report is attached to this email as a {{reportFormat}} file.</li>
+                    <li>You can download and open it using standard software compatible with this format.</li>
+                    <li>For PDF reports, use any PDF reader like Adobe Reader or your browser.</li>
+                    <li>For Excel reports, use Microsoft Excel or Google Sheets.</li>
+                    <li>For CSV reports, use Microsoft Excel, Google Sheets, or any spreadsheet software.</li>
+                </ul>
+            </div>
+            
+            <div class="cta-container">
+                <a href="{{dashboardUrl}}" class="cta-button">Access Dashboard</a>
+            </div>
+            
+            <p class="note">If you have any questions or need assistance with this report, please contact our support team.</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; {{currentYear}} DeynCare. All rights reserved.</p>
+            <p class="small">This email was sent automatically. Please do not reply directly to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

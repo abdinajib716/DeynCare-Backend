@@ -168,7 +168,7 @@ const AuthService = {
       await user.save();
 
       // Send new verification email
-      await EmailService.sendVerificationEmail({ email: user.email, fullName: user.fullName }, newVerificationCode);
+      await EmailService.auth.sendVerificationEmail({ email: user.email, fullName: user.fullName }, newVerificationCode);
       
       // Log the action
       await LogHelper.createAuthLog('verification_code_resent', {
@@ -200,7 +200,32 @@ const AuthService = {
       // Find active user using normalized email
       const normalizedEmail = email.toLowerCase().trim();
       
-      // Try to find the user with UserHelper
+      // First check if user exists at all - without status filter
+      const userExists = await User.findOne({
+        email: normalizedEmail,
+        isDeleted: false
+      });
+      
+      // If user exists but is suspended, give specific message
+      if (userExists && userExists.isSuspended) {
+        // Log suspended account attempt
+        await LogHelper.createSecurityLog('suspended_login_attempt', {
+          actorId: userExists.userId,
+          actorRole: userExists.role,
+          targetId: userExists.userId,
+          shopId: userExists.shopId || null,
+          details: { deviceName, ip, reason: userExists.suspensionReason || 'No reason provided' }
+        });
+        
+        logWarning(`Suspended account login attempt: ${normalizedEmail}`, 'AuthService');
+        throw new AppError(
+          'This account has been suspended. Please contact support for assistance.',
+          401,
+          'account_suspended'
+        );
+      }
+      
+      // Try to find active user
       const user = await User.findOne({ 
         email: normalizedEmail, 
         status: 'active',
@@ -238,16 +263,20 @@ const AuthService = {
       // Generate tokens
       const { accessToken, refreshToken } = await TokenService.generateAuthTokens(user, deviceName, ip);
       
+      // Update the lastLoginAt field on the user document
+      user.lastLoginAt = new Date();
+      await user.save();
+      
       // Log successful login
       await LogHelper.createAuthLog('user_login', {
         actorId: user.userId,
         actorRole: user.role,
         targetId: user.userId,
         shopId: user.shopId || null,
-        details: { deviceName, ip }
+        details: { deviceName, ip, lastLoginAt: user.lastLoginAt }
       });
       
-      logSuccess(`User logged in: ${user.userId} (${user.email})`, 'AuthService');
+      logSuccess(`User logged in: ${user.userId} (${user.email}) at ${user.lastLoginAt}`, 'AuthService');
 
       // Return sanitized user data and tokens
       return {
@@ -305,8 +334,10 @@ const AuthService = {
    */
   logout: async (refreshToken) => {
     try {
+      // If no token provided, return early as there's nothing to invalidate
       if (!refreshToken) {
-        throw new AppError('Refresh token is required', 400, 'missing_token');
+        logWarning('Logout attempted without refresh token', 'AuthService');
+        return { success: true, message: 'No token to invalidate' };
       }
 
       // Revoke the token and get session information for logging
@@ -420,7 +451,7 @@ const AuthService = {
           email: user.email,
           fullName: user.fullName || 'User'
         };
-        await EmailService.sendPasswordResetEmail(userForEmail, token);
+        await EmailService.auth.sendPasswordResetEmail(userForEmail, token);
         logSuccess(`Password reset email sent to: ${user.email}`, 'AuthService');
       } catch (emailError) {
         // Log email error but don't fail the request
@@ -459,6 +490,14 @@ const AuthService = {
    */
   resetPassword: async (token, newPassword) => {
     try {
+      // DEBUG: Add detailed debugging for reset password
+      console.log('DEBUG AuthService.resetPassword:');
+      console.log('- Token received:', token);
+      console.log('- Token type:', typeof token);
+      console.log('- Token length:', token ? token.length : 0);
+      console.log('- NewPassword present:', !!newPassword);
+      console.log('- NewPassword type:', typeof newPassword);
+      
       // Log token debugging info in development
       if (process.env.NODE_ENV === 'development') {
         await DebugHelper.logResetTokenDebug(token);
@@ -470,6 +509,15 @@ const AuthService = {
         resetPasswordExpires: { $gt: new Date() },
         isDeleted: false
       });
+
+      // DEBUG: Log if user was found
+      console.log('DEBUG: User found with token?', !!user);
+      if (!user) {
+        console.log('DEBUG: No user found with token. Token expired or invalid.');
+      } else {
+        console.log('DEBUG: Found user ID:', user.userId);
+        console.log('DEBUG: Token expiry time:', user.resetPasswordExpires);
+      }
 
       if (!user) {
         // Log failed attempt for security monitoring

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Suspension - DeynCare</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .suspension-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #dc3545;
+        }
+        .reason-details {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #fff3f3;
+            border-radius: 4px;
+            border: 1px solid #fee;
+        }
+        .contact-support {
+            margin-top: 25px;
+            text-align: center;
+        }
+        .support-btn {
+            background-color: #17a2b8;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="https://deyncare.com/logo.png" alt="DeynCare Logo" class="logo">
+        </div>
+        
+        <div class="content">
+            <h1>Account Suspension Notice</h1>
+            
+            <p>Dear {{name}},</p>
+            
+            <div class="alert alert-danger">
+                <strong>Important Notice:</strong> Your account has been suspended.
+            </div>
+            
+            <div class="suspension-box">
+                <h3>Suspension Details</h3>
+                <p>We regret to inform you that your DeynCare account has been suspended effective <strong>{{suspensionDate}}</strong>.</p>
+                
+                <div class="reason-details">
+                    <h4>Reason for Suspension:</h4>
+                    <p>{{reason}}</p>
+                </div>
+                
+                <p>During this suspension period, you will not be able to access your account or any associated services. If you believe this suspension was made in error or would like to appeal this decision, please contact our support team.</p>
+            </div>
+            
+            <div class="contact-support">
+                <p>For assistance or to discuss this suspension, please contact:</p>
+                <p><strong>Email:</strong> <a href="mailto:{{contactEmail}}">{{contactEmail}}</a></p>
+                <a href="mailto:{{contactEmail}}?subject=Account%20Suspension%20Appeal" class="support-btn">Contact Support</a>
+            </div>
+            
+            <p class="closing">Thank you for your understanding,<br>The DeynCare Team</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; {{year}} DeynCare. All rights reserved.</p>
+            <p>This is an automated message, please do not reply directly to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

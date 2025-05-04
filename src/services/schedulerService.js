@@ -67,7 +67,7 @@ const SchedulerService = {
             const daysLeft = trial.daysRemaining;
             
             // Send reminder email
-            await EmailService.sendTrialEndingReminderEmail({
+            await EmailService.subscription.sendTrialEndingReminderEmail({
               email: shop.email,
               shopName: shop.shopName,
               trialEndsAt: trial.dates.trialEndsAt,
@@ -126,7 +126,7 @@ const SchedulerService = {
             const daysLeft = subscription.daysRemaining;
             
             // Send reminder email
-            await EmailService.sendSubscriptionExpiryReminderEmail({
+            await EmailService.subscription.sendSubscriptionExpiryReminderEmail({
               email: shop.email,
               shopName: shop.shopName,
               endDate: subscription.dates.endDate,
@@ -198,7 +198,7 @@ const SchedulerService = {
             );
             
             // Send renewal confirmation email
-            await EmailService.sendSubscriptionRenewalEmail({
+            await EmailService.subscription.sendSubscriptionRenewalEmail({
               email: shop.email,
               shopName: shop.shopName,
               endDate: updatedSubscription.dates.endDate,
@@ -265,7 +265,7 @@ const SchedulerService = {
             );
             
             // Send expiration notification email
-            await EmailService.sendSubscriptionExpiredEmail({
+            await EmailService.subscription.sendSubscriptionExpiredEmail({
               email: shop.email,
               shopName: shop.name,
               endDate: subscription.endDate,

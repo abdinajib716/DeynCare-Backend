@@ -97,6 +97,10 @@ const createPayment = {
         'number.greater': 'Amount must be greater than 0',
         'any.required': 'Amount is required'
       }),
+    discountCode: Joi.string().trim()
+      .messages({
+        'string.empty': 'Discount code cannot be empty if provided'
+      }),
     debtAmount: Joi.number().greater(0)
       .when('paymentContext', {
         is: 'debt',

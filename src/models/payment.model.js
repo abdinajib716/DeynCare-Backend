@@ -49,6 +49,17 @@ const paymentSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  originalAmount: {
+    type: Number
+  },
+  discountAmount: {
+    type: Number,
+    default: 0
+  },
+  discountId: {
+    type: String,
+    trim: true
+  },
   debtAmount: {
     type: Number
   },

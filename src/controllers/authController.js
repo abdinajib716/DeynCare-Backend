@@ -4,6 +4,7 @@ const UserService = require('../services/userService');
 const ShopService = require('../services/shopService');
 const EmailService = require('../services/emailService');
 const SettingsService = require('../services/settingsService');
+const DiscountService = require('../services/discountService');
 
 // Import utility modules using the new directory structure
 const { 
@@ -57,7 +58,8 @@ const AuthController = {
         paymentMethod = 'offline',
         initialPaid = false,
         // Payment details
-        paymentDetails
+        paymentDetails,
+        discountCode
       } = req.validatedData || req.body; // Use validated data if available
 
       // Check if the selected payment method is enabled
@@ -120,6 +122,7 @@ const AuthController = {
       let userData;
       let shopId = null;
       let shopLogoData = null;
+      let discountDetails = null;
       
       try {
         // Process shop logo file if uploaded
@@ -127,6 +130,29 @@ const AuthController = {
           const FileUploadService = require('../services/fileUploadService');
           shopLogoData = await FileUploadService.saveShopLogo(req.file);
           logInfo(`Shop logo uploaded during registration: ${shopLogoData.fileId}`, 'AuthController');
+        }
+        
+        // Process discount code if provided
+        if (discountCode && initialPaid) {
+          try {
+            // Get subscription price based on plan type
+            const planPrices = await SubscriptionService.getPlanPrices();
+            const planPrice = planPrices[planType] || 0;
+            
+            // Apply discount code
+            discountDetails = await DiscountService.validateAndCalculateDiscount(
+              discountCode,
+              planPrice,
+              'subscription',
+              'system', // We don't have a userId yet
+              null // No shop ID yet
+            );
+            
+            logInfo(`Applied discount code ${discountCode} to registration, saving $${discountDetails.discountAmount}`, 'AuthController');
+          } catch (discountError) {
+            logWarning(`Invalid discount code provided: ${discountCode}`, 'AuthController', discountError);
+            // We'll continue without a discount if the code is invalid
+          }
         }
         
         // 1. If shop details provided, create a new shop
@@ -159,7 +185,8 @@ const AuthController = {
               startDate: new Date(),
               paymentMethod: paymentCategory, // Use the mapped category
               initialPaid,
-              paymentDetails
+              paymentDetails,
+              discountDetails
             },
             registeredBy,
             session
@@ -230,13 +257,13 @@ const AuthController = {
 
       // 3. Send verification email if not created by super admin
       if (registeredBy !== 'superAdmin') {
-        await EmailService.sendVerificationEmail({ email, fullName }, verificationCode);
+        await EmailService.auth.sendVerificationEmail({ email, fullName }, verificationCode);
       }
       
       // 4. Send welcome email if created by super admin
       if (registeredBy === 'superAdmin' && shopId) {
         const shop = await ShopService.getShopById(shopId);
-        await EmailService.sendWelcomeEmail(userData, shop);
+        await EmailService.auth.sendWelcomeEmail(userData, shop);
       }
 
       // Return success response (excluding sensitive data)
@@ -352,7 +379,7 @@ const AuthController = {
       
       // Send welcome email with credentials if password was generated
       if (generatePassword) {
-        await EmailService.sendEmployeeWelcomeEmail({
+        await EmailService.auth.sendEmployeeWelcomeEmail({
           email,
           fullName,
           password: finalPassword,
@@ -408,7 +435,7 @@ const AuthController = {
       if (user.role === 'admin' && user.shopId) {
         // Use ShopHelper to get shop
         const shop = await ShopHelper.findActiveShop(user.shopId);
-        await EmailService.sendWelcomeEmail(user, shop);
+        await EmailService.auth.sendWelcomeEmail(user, shop);
       }
 
       // Use ResponseHelper for consistent response
@@ -500,22 +527,45 @@ const AuthController = {
    */
   refreshToken: async (req, res, next) => {
     try {
-      // Get refresh token from request using TokenHelper
-      const refreshToken = TokenHelper.getRefreshTokenFromRequest(req);
+      // Get refresh token from multiple sources (request body, cookies, or headers)
+      let refreshToken;
+      
+      // First try to get it from request body (for frontend client usage)
+      if (req.body && req.body.refreshToken) {
+        refreshToken = req.body.refreshToken;
+        logInfo('Using refresh token from request body', 'AuthController');
+      } else {
+        // Fallback to helper for cookie/header extraction
+        refreshToken = TokenHelper.getRefreshTokenFromRequest(req);
+        logInfo('Using refresh token from cookie/header', 'AuthController');
+      }
+      
+      // Validate that we have a token
+      if (!refreshToken) {
+        logWarning('No refresh token provided in request', 'AuthController');
+        return ResponseHelper.error(
+          res, 
+          'No refresh token provided', 
+          400, 
+          'missing_refresh_token'
+        );
+      }
       
       // Use AuthService to refresh token
       try {
         const result = await AuthService.refreshToken(refreshToken);
         
-        // Set access token cookie using TokenHelper
+        // Set access token cookie using TokenHelper for browser clients
         TokenHelper.setAccessTokenCookie(res, result.accessToken);
         
+        // Include refresh token in response for frontend clients
         return ResponseHelper.success(res, 'Token refreshed successfully', {
           accessToken: result.accessToken,
+          refreshToken: result.refreshToken, // Send back the refresh token too
           expiresIn: 15 * 60 // 15 minutes in seconds
         });
       } catch (authError) {
-        // Handle specific errors
+        // Handle specific authentication errors
         if (authError.statusCode) {
           return ResponseHelper.error(
             res,
@@ -541,24 +591,25 @@ const AuthController = {
       // Get refresh token from request using TokenHelper
       const refreshToken = TokenHelper.getRefreshTokenFromRequest(req);
       
-      try {
-        // Use AuthService to logout
-        const result = await AuthService.logout(refreshToken);
-        
-        // Clear token cookies using TokenHelper
-        TokenHelper.clearTokenCookies(res);
+      // Always clear cookies, regardless of whether we have a token
+      TokenHelper.clearTokenCookies(res);
 
+      // If no refresh token is present, just return success without trying to invalidate
+      if (!refreshToken) {
+        logInfo('Logout without refresh token - clearing cookies only', 'AuthController');
         return ResponseHelper.success(res, 'Logged out successfully');
-      } catch (authError) {
-        // If token is invalid, still clear cookies and return success
-        if (authError.errorCode === 'missing_token' || authError.errorCode === 'invalid_token') {
-          // Clear token cookies using TokenHelper
-          TokenHelper.clearTokenCookies(res);
-          
-          return ResponseHelper.success(res, 'Logged out successfully');
-        }
-        throw authError;
       }
+      
+      try {
+        // Try to use AuthService to logout and invalidate the session
+        await AuthService.logout(refreshToken);
+      } catch (authError) {
+        // Log the error but don't fail the request
+        logError(`Error during logout: ${authError.message}`, 'AuthController', authError);
+        // For missing or invalid token, we've already cleared cookies, so we're good
+      }
+      
+      return ResponseHelper.success(res, 'Logged out successfully');
     } catch (error) {
       logError('Logout error', 'AuthController', error);
       return next(error);
@@ -636,7 +687,19 @@ const AuthController = {
       const token = req.validatedData?.token || req.body.token || req.query.token;
       const newPassword = req.validatedData?.newPassword || req.body.newPassword;
       
+      // DEBUG: Log the incoming request data
+      console.log('DEBUG RESET PASSWORD REQUEST:');
+      console.log('- Headers:', JSON.stringify(req.headers));
+      console.log('- Body:', JSON.stringify(req.body));
+      console.log('- Query:', JSON.stringify(req.query));
+      console.log('- Validated Data:', JSON.stringify(req.validatedData));
+      console.log('- Token extracted:', token);
+      console.log('- newPassword present:', !!newPassword);
+      
       if (!token || !newPassword) {
+        console.log('DEBUG ERROR: Missing token or newPassword');
+        console.log('- token present:', !!token);
+        console.log('- newPassword present:', !!newPassword);
         return ResponseHelper.error(
           res, 
           'Token and new password are required', 
@@ -645,7 +708,6 @@ const AuthController = {
         );
       }
       
-      // Debug token in development mode only
       if (process.env.NODE_ENV === 'development') {
         await DebugHelper.debugResetToken(token);
       }

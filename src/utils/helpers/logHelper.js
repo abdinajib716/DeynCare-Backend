@@ -151,6 +151,25 @@ const LogHelper = {
       shopId: actor.shopId || null,
       details: actor.details || details
     });
+  },
+
+  /**
+   * Create an admin action log entry
+   * @param {string} action - The admin action (list_all_users, manage_settings, etc.)
+   * @param {Object} actor - Actor performing the action 
+   * @param {Object} details - Additional details
+   * @returns {Promise<Object|null>} Created log or null if creation failed
+   */
+  async createAdminLog(action, actor, details = {}) {
+    return this.safeLog({
+      action,
+      actorId: actor.actorId || actor._id || 'system',
+      targetId: actor.targetId || '',
+      role: actor.actorRole || actor.role || 'system',
+      module: 'admin',
+      shopId: actor.shopId || null,
+      details
+    });
   }
 };
 
