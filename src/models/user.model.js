@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema({
   },
   shopId: {
     type: String,
-    default: null // null for superAdmin
+    default: null // superAdmin can operate without a shop, admin/employee must have a shop
   },
   status: {
     type: String,

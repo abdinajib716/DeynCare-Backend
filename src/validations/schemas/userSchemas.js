@@ -18,9 +18,14 @@ const userSchemas = {
         'any.only': 'Role must be valid',
         'any.required': 'Role is required'
       }),
-    shopId: Joi.string().required()
+    shopId: Joi.string()
+      .when('role', {
+        is: 'superAdmin',
+        then: Joi.string().optional().allow(null, ''),
+        otherwise: Joi.string().required()
+      })
       .messages({
-        'any.required': 'Shop ID is required'
+        'any.required': 'Shop ID is required for admin and employee roles'
       }),
     isActive: Joi.boolean().default(true)
   }),
