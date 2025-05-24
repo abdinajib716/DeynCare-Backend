@@ -61,13 +61,21 @@ class AdminEmailService extends BaseEmailService {
         subject: 'Your Account Has Been Reactivated'
       };
       
-      // Use the Template pattern to call the sendEmail method with multiple parameters
-      return await this.sendEmail({
-        to,
-        subject: 'Your Account Has Been Reactivated',
-        template: 'Admin/account-reactivation',
-        data: templateData
-      });
+      // Log template loading attempt for debugging
+      console.log(`[AdminEmailService] Attempting to render reactivation email template for ${to}`);
+      
+      // Explicitly use the exact case that matches the filesystem
+      const html = this.renderTemplate('Admin/account-reactivation', templateData);
+      
+      // Log if template was found and rendered
+      if (html && html.length > 100) {
+        console.log(`[AdminEmailService] Successfully rendered reactivation template (${html.length} chars)`);
+      } else {
+        console.log(`[AdminEmailService] Warning: Template rendered with only ${html?.length} chars`);
+      }
+      
+      // Send email directly with explicit template rendering
+      return await this.sendMail(to, 'Your Account Has Been Reactivated', html);
     } catch (error) {
       logError(`Failed to send account reactivation email to ${to}`, 'AdminEmailService', error);
       throw new AppError('Failed to send reactivation notification', 500, 'email_error');

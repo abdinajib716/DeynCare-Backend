@@ -28,6 +28,9 @@ class BaseEmailService {
    */
   init() {
     try {
+      // Log email configuration (without sensitive data)
+      logInfo(`Initializing email service with host: ${process.env.EMAIL_HOST}, port: ${process.env.EMAIL_PORT}, user: ${process.env.EMAIL_USER}`, 'BaseEmailService');
+      
       // Create a transporter with email settings from env
       this.transporter = nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
@@ -36,12 +39,15 @@ class BaseEmailService {
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS
-        }
+        },
+        // Add debug option if in development
+        debug: process.env.NODE_ENV === 'development',
+        logger: process.env.NODE_ENV === 'development'
       });
 
       this.sender = process.env.EMAIL_FROM || 'support@deyncare.com';
       this.initialized = true;
-      logInfo('Email service initialized', 'BaseEmailService');
+      logSuccess('Email service initialized successfully', 'BaseEmailService');
     } catch (error) {
       logError('Failed to initialize email service', 'BaseEmailService', error);
       this.initialized = false;
@@ -56,12 +62,14 @@ class BaseEmailService {
    * @returns {Promise<boolean>} - Success status
    */
   async sendMail(to, subject, html) {
+    // Always reinitialize the transporter to ensure fresh credentials
+    this.init();
     if (!this.initialized) {
-      this.init();
-      if (!this.initialized) {
-        throw new AppError('Email service is not available', 500, 'service_unavailable');
-      }
+      throw new AppError('Email service is not available', 500, 'service_unavailable');
     }
+    
+    // Log email attempt
+    logInfo(`Attempting to send email to ${to} with subject: ${subject}`, 'BaseEmailService');
 
     try {
       const mailOptions = {
@@ -137,10 +145,45 @@ class BaseEmailService {
    */
   renderTemplate(templateKey, data = {}) {
     try {
+      // Log the template loading attempt
+      console.log(`[BaseEmailService] Attempting to render template: '${templateKey}'`);
+      console.log(`[BaseEmailService] Available templates: ${Object.keys(this.templates).join(', ')}`);
+      
+      // Check if we need to reload templates (in case they were added or modified)
+      if (Object.keys(this.templates).length === 0) {
+        console.log('[BaseEmailService] No templates loaded, reloading templates...');
+        this.loadTemplates();
+      }
+      
       // Check if template exists
       if (!this.templates[templateKey]) {
-        logError(`Template not found: ${templateKey}`, 'BaseEmailService');
-        return this.renderFallback(data);
+        // Try case-insensitive match as a fallback
+        const lowerCaseKey = templateKey.toLowerCase();
+        const availableKeys = Object.keys(this.templates);
+        const matchingKey = availableKeys.find(key => key.toLowerCase() === lowerCaseKey);
+        
+        if (matchingKey) {
+          console.log(`[BaseEmailService] Found template with case-insensitive match: '${matchingKey}'`);
+          templateKey = matchingKey;
+        } else {
+          // Last resort: try to load it directly from the file system
+          try {
+            const templatePath = path.join(this.templatesDir, `${templateKey}.html`);
+            console.log(`[BaseEmailService] Attempting to load template directly from: ${templatePath}`);
+            
+            if (fs.existsSync(templatePath)) {
+              this.templates[templateKey] = fs.readFileSync(templatePath, 'utf8');
+              console.log(`[BaseEmailService] Successfully loaded template directly: ${templateKey}`);
+            } else {
+              logError(`Template file not found: ${templatePath}`, 'BaseEmailService');
+              return this.renderFallback(data);
+            }
+          } catch (fsError) {
+            console.error(`[BaseEmailService] Failed to load template directly: ${fsError.message}`);
+            logError(`Template not found: ${templateKey}`, 'BaseEmailService');
+            return this.renderFallback(data);
+          }
+        }
       }
 
       // Add common variables
@@ -222,12 +265,15 @@ class BaseEmailService {
    * @returns {Promise<boolean>} - Success status
    */
   async sendEmail(options) {
+    // Always reinitialize the transporter to ensure fresh credentials
+    this.init();
     if (!this.initialized) {
-      this.init();
-      if (!this.initialized) {
-        throw new AppError('Email service is not available', 500, 'service_unavailable');
-      }
+      throw new AppError('Email service is not available', 500, 'service_unavailable');
     }
+    
+    // Log detailed email attempt
+    const to = Array.isArray(options.to) ? options.to.join(', ') : options.to;
+    logInfo(`Attempting to send template email to ${to} with template: ${options.template}`, 'BaseEmailService');
 
     try {
       const { to, subject, template, data = {}, attachments = [] } = options;

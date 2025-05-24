@@ -69,7 +69,9 @@ const _prepareStatusUpdateData = (status, reason) => {
 const changeUserStatus = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const { status, reason } = req.validatedData || req.body;
+    const { status, reason, sendEmail = true } = req.validatedData || req.body;
+    
+    console.log(`[UserController] Changing user ${userId} status to ${status} with sendEmail=${sendEmail}`);
     
     // Get the user to update
     const userToUpdate = await UserService.getUserById(userId, { sanitize: false });
@@ -97,9 +99,13 @@ const changeUserStatus = async (req, res, next) => {
     // Update the user
     const updatedUser = await UserService.updateUser(userId, updateData, options);
     
-    // Send notification asynchronously (don't await)
-    NotificationService.sendStatusChangeNotification(userToUpdate, status, reason)
-      .catch(error => logError(`Notification error: ${error.message}`, 'UserController', error));
+    // Send notification asynchronously if sendEmail is true (don't await)
+    if (sendEmail !== false) {
+      NotificationService.sendStatusChangeNotification(userToUpdate, status, reason)
+        .catch(error => logError(`Notification error: ${error.message}`, 'UserController', error));
+    } else {
+      logInfo(`Email notification skipped for user ${userId} status change to ${status}`, 'UserController');
+    }
     
     // Log the status change
     await LogHelper.createSecurityLog('user_status_changed', {

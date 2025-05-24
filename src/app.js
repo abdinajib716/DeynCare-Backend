@@ -15,6 +15,7 @@ const settingsRoutes = require('./routes/settingsRoutes');
 const discountRoutes = require('./routes/discountRoutes');
 const userRoutes = require('./routes/userRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const shopRoutes = require('./routes/shopRoutes');
 // Import other routes as they are created
 
 dotenv.config();
@@ -43,7 +44,9 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/discounts', discountRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/shops', shopRoutes);
 console.log('Report routes registered successfully');
+console.log('Shop routes registered successfully');
 // Add other routes as they are created
 
 app.get('/api/health', (req, res) => {
@@ -64,7 +67,8 @@ app.get('/', (req, res) => {
     endpoints: {
       auth: '/api/auth',
       health: '/api/health',
-      settings: '/api/settings'
+      settings: '/api/settings',
+      shops: '/api/shops'
     }
   });
 });

@@ -136,12 +136,12 @@ const createUser = async (userData, options = {}) => {
 
     logSuccess(`User created: ${userId} (${normalizedEmail})`, 'UserService');
     
-    // Get user data to return
-    const userData = user.toObject();
+    // Get user data to return (using a different variable name to avoid shadowing)
+    const userDataObj = user.toObject();
     
     // Populate shop name if shop ID exists - will be imported from the index.js
     const populateShopNames = require('./populateShopNames');
-    const populatedUser = await populateShopNames(userData);
+    const populatedUser = await populateShopNames(userDataObj);
     
     return populatedUser;
   } catch (error) {

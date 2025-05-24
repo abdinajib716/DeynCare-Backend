@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['active', 'inactive', 'suspended'],
+    enum: ['active', 'inactive', 'suspended', 'pending'],
     default: 'active'
   },
   // New field: Flag for suspension
