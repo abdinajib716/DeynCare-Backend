@@ -14,6 +14,7 @@ const router = express.Router();
 
 // Registration and verification
 router.post('/register', upload.single('shopLogo'), validate(authSchemas.register), authController.register);
+router.post('/check-email', validate(authSchemas.checkEmail), authController.checkEmailExists);
 router.post('/verify-email', validate(authSchemas.verifyEmail), authController.verifyEmail);
 router.post('/resend-verification', validate(authSchemas.forgotPassword), authController.resendVerification);
 

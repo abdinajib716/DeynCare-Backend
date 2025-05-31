@@ -76,7 +76,7 @@ if (useSimplifiedServer) {
       
       await bootstrap();
       
-      const server = simpleApp.listen(PORT, () => {
+      const server = simpleApp.listen(PORT, '0.0.0.0', () => {
         logSuccess(`✅ DeynCare API Server (Simplified) running on port ${PORT}`, 'Server');
         logInfo(`Environment: ${process.env.NODE_ENV || 'development'}`, 'Server');
         logInfo(`MongoDB Connection: Active`, 'Server');
@@ -119,7 +119,7 @@ if (useSimplifiedServer) {
       await bootstrap();
       
       // Start the server after successful database connection
-      const server = app.listen(PORT, () => {
+      const server = app.listen(PORT, '0.0.0.0', () => {
         logSuccess(`✅ DeynCare API Server running on port ${PORT}`, 'Server');
         logInfo(`Environment: ${process.env.NODE_ENV || 'development'}`, 'Server');
         logInfo(`MongoDB Connection: Active`, 'Server');

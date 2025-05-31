@@ -83,7 +83,7 @@ const createShop = async (shopData, options = {}) => {
     const paymentDetails = subscriptionData.paymentDetails || null;
     const discountDetails = subscriptionData.discountDetails || null;
     
-    const subscriptionValidation = SubscriptionHelper.validateSubscriptionData({
+    const subscriptionValidation = SubscriptionHelper.validateSubscription({
       planType,
       paymentMethod,
       initialPaid,

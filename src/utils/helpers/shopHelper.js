@@ -132,16 +132,43 @@ const ShopHelper = {
       sanitizedData: { ...shopData }
     };
     
-    // Required fields
-    const requiredFields = ['shopName', 'ownerName', 'email', 'phone', 'address'];
+    // Normalize the shop data - map alternate field names to expected ones
+    const normalizedData = { ...shopData };
     
-    // Check for required fields
-    for (const field of requiredFields) {
-      if (!shopData[field]) {
+    // Map fullName to ownerName if ownerName is missing but fullName exists
+    if (!normalizedData.ownerName && normalizedData.fullName) {
+      normalizedData.ownerName = normalizedData.fullName;
+    }
+    
+    // Map shopAddress to address if address is missing but shopAddress exists
+    if (!normalizedData.address && normalizedData.shopAddress) {
+      normalizedData.address = normalizedData.shopAddress;
+    }
+    
+    // Map name to shopName if shopName is missing but name exists
+    if (!normalizedData.shopName && normalizedData.name) {
+      normalizedData.shopName = normalizedData.name;
+    }
+    
+    // Required fields with their user-friendly names
+    const requiredFields = [
+      { field: 'shopName', label: 'shopName' },
+      { field: 'ownerName', label: 'ownerName' },
+      { field: 'email', label: 'email' },
+      { field: 'phone', label: 'phone' },
+      { field: 'address', label: 'address' }
+    ];
+    
+    // Check for required fields using the normalized data
+    for (const { field, label } of requiredFields) {
+      if (!normalizedData[field]) {
         result.isValid = false;
-        result.errors.push(`Missing required field: ${field}`);
+        result.errors.push(`Missing required field: ${label}`);
       }
     }
+    
+    // Update sanitizedData with normalized values
+    result.sanitizedData = { ...normalizedData };
     
     // Validate shop name
     if (shopData.shopName && (shopData.shopName.length < 2 || shopData.shopName.length > 100)) {

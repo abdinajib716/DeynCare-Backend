@@ -160,9 +160,9 @@ const SettingsHelper = {
       const shopSettings = [
         // Shop-specific available payment methods
         {
-          key: 'payment_methods_available',
+          key: `shop_payment_methods_${shopId}`, // Using a shop-specific key to avoid conflicts
           category: 'payment',
-          displayName: 'Available Payment Methods',
+          displayName: 'Shop Payment Methods',
           description: 'Payment methods available for this shop',
           value: ['Cash', 'EVC Plus', 'Bank Transfer', 'Mobile Money', 'offline'],
           dataType: 'array',

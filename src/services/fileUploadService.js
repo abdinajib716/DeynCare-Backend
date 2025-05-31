@@ -5,7 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
-const { AppError, logInfo, logError, logSuccess, idGenerator } = require('../utils');
+const { AppError, logInfo, logError, logSuccess, logWarning, idGenerator } = require('../utils');
 
 // Promisify fs operations
 const mkdirAsync = util.promisify(fs.mkdir);
@@ -162,7 +162,7 @@ const FileUploadService = {
       
       // Generate a unique filename
       const ext = path.extname(file.originalname);
-      const filename = `${fileId}${ext}`;
+      let filename = `${fileId}${ext}`;
       
       // Ensure shop-logos directory exists
       const uploadDir = path.join(FileUploadService.baseUploadDir, 'shop-logos');
@@ -175,7 +175,7 @@ const FileUploadService = {
       
       // Generate URL for file
       const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
-      const fileUrl = `${baseUrl}/api/files/${fileId}`;
+      let fileUrl = `${baseUrl}/api/files/${fileId}`;
       
       // File is already saved by multer, just create record in database
       // Create file record in database
@@ -227,8 +227,9 @@ const FileUploadService = {
           await retryFileRecord.save();
           logSuccess(`Shop logo saved on retry: ${newFileId}`, 'FileUploadService');
           
-          // Update the fileId and fileUrl for the return value
+          // Update the fileId, filename, and fileUrl for the return value
           fileId = newFileId;
+          filename = `${newFileId}${ext}`;
           fileUrl = `${baseUrl}/api/files/${newFileId}`;
         } else {
           // If it's not a duplicate key error or retry failed, rethrow

@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { User, Session } = require('../models');
-const { AppError, generateToken, logAuth, logError, logWarning, logInfo, idGenerator } = require('../utils');
+const { AppError, generateToken, logAuth, logError, logWarning, logInfo, idGenerator, TokenHelper } = require('../utils');
 
 /**
  * Service for handling all JWT token operations
@@ -30,10 +30,11 @@ const TokenService = {
    * @param {String} expiresIn - Token expiry (default: 15m)
    * @returns {String} - JWT token
    */
-  generateAccessToken: (payload, expiresIn = '15m') => {
+  generateAccessToken: (payload, expiresIn = process.env.JWT_ACCESS_EXPIRY || '15m') => {
     try {
-      // Use JWT_ACCESS_SECRET instead of JWT_SECRET
-      return jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn });
+      // Use TOKEN_SECRET as a fallback if JWT_ACCESS_SECRET is not available
+      const secret = process.env.JWT_ACCESS_SECRET || process.env.TOKEN_SECRET || 'deyncare-secure-token-secret-key';
+      return jwt.sign(payload, secret, { expiresIn });
     } catch (error) {
       logError('Failed to generate access token', 'TokenService', error);
       throw new AppError('Token generation failed', 500);
@@ -45,16 +46,22 @@ const TokenService = {
    * @param {Object} user - User object
    * @param {String} device - Device information
    * @param {String} ip - IP address
+   * @param {Object} options - Additional options
+   * @param {Boolean} options.secure - Whether to use secure cookies
    * @returns {Object} - Token object containing refresh token and other details
    */
-  generateRefreshToken: async (user, device = 'Unknown', ip = '') => {
+  generateRefreshToken: async (user, device = 'Unknown', ip = '', options = {}) => {
     try {
       // Create a unique token string using UUID for better security
       const tokenString = TokenService.generateSecureToken();
       
-      // Calculate expiration (30 days)
+      // Calculate expiration using environment variable or default to 30 days
+      const refreshExpiry = process.env.JWT_REFRESH_EXPIRY || '30d';
+      const refreshExpiryDays = refreshExpiry.endsWith('d') ? 
+        parseInt(refreshExpiry.slice(0, -1)) : 30;
+      
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 30);
+      expiresAt.setDate(expiresAt.getDate() + refreshExpiryDays);
 
       // Check and limit active sessions per user
       const activeSessions = await Session.countDocuments({
@@ -111,9 +118,11 @@ const TokenService = {
    * @param {Object} user - User object
    * @param {String} device - Device information
    * @param {String} ip - IP address
+   * @param {Object} options - Additional options
+   * @param {Boolean} options.secure - Whether to use secure cookies
    * @returns {Object} - Object containing accessToken and refreshToken
    */
-  generateAuthTokens: async (user, device = 'Unknown', ip = '') => {
+  generateAuthTokens: async (user, device = 'Unknown', ip = '', options = {}) => {
     try {
       // Create payload for access token
       const payload = {
@@ -126,9 +135,9 @@ const TokenService = {
       // Generate access token
       const accessToken = TokenService.generateAccessToken(payload);
       
-      // Generate refresh token
-      const refreshTokenObj = await TokenService.generateRefreshToken(user, device, ip);
-      const refreshToken = refreshTokenObj.token;
+      // Generate refresh token with options
+      const refreshTokenData = await TokenService.generateRefreshToken(user, device, ip, options);
+      const refreshToken = refreshTokenData.token;
       
       logAuth(`Generated auth tokens for user ${user.userId}`, 'TokenService');
       
@@ -149,8 +158,9 @@ const TokenService = {
    */
   verifyAccessToken: (token) => {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-      return decoded;
+      // Use new security environment variables
+      const secret = process.env.JWT_ACCESS_SECRET || process.env.TOKEN_SECRET || 'deyncare-secure-token-secret-key';
+      return jwt.verify(token, secret);
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
         throw new AppError('Token has expired', 401, 'token_expired');
@@ -199,7 +209,44 @@ const TokenService = {
         throw error;
       }
       logError(`Refresh token verification error: ${error.message}`, 'TokenService', error);
-      throw new AppError('Token verification failed', 500);
+      throw new AppError('Refresh token verification failed', 401);
+    }
+  },
+  
+  /**
+   * Refresh access token using refresh token
+   * @param {String} refreshToken - Refresh token
+   * @returns {Object} - Object containing new access token and user information
+   */
+  refreshAccessToken: async (refreshToken) => {
+    try {
+      // Verify the refresh token first
+      const { user, session } = await TokenService.verifyRefreshToken(refreshToken);
+      
+      // Create payload for the new access token
+      const payload = {
+        userId: user.userId,
+        role: user.role,
+        shopId: user.shopId || null,
+        email: user.email
+      };
+      
+      // Generate a new access token
+      const accessToken = TokenService.generateAccessToken(payload);
+      
+      logAuth(`Access token refreshed for user ${user.userId}, session ${session.sessionId}`, 'TokenService');
+      
+      // Return both the new access token and user info
+      return {
+        accessToken,
+        userId: user.userId,
+        sessionId: session.sessionId,
+        role: user.role,
+        shopId: user.shopId || null
+      };
+    } catch (error) {
+      logError(`Failed to refresh access token: ${error.message}`, 'TokenService', error);
+      throw error; // Re-throw to be handled by the controller
     }
   },
 
@@ -285,6 +332,48 @@ const TokenService = {
       throw new AppError('Failed to revoke tokens', 500);
     }
   }
+};
+
+/**
+ * Set auth cookies in HTTP response
+ * @param {Object} res - Express response object
+ * @param {Object} tokens - Auth tokens
+ * @param {String} tokens.accessToken - JWT access token
+ * @param {String} tokens.refreshToken - JWT refresh token
+ * @returns {void}
+ */
+TokenService.setAuthCookies = (res, tokens) => {
+  // Get cookie options from environment or use defaults
+  const useSecure = process.env.SESSION_SECURE === 'true' || process.env.NODE_ENV === 'production';
+  const cookieMaxAge = parseInt(process.env.SESSION_MAX_AGE) || 24 * 60 * 60 * 1000; // 24 hours
+  
+  // Set access token cookie - shorter lifespan
+  res.cookie('accessToken', tokens.accessToken, {
+    httpOnly: true,
+    secure: useSecure,
+    sameSite: 'strict',
+    maxAge: 15 * 60 * 1000, // 15 minutes
+    path: '/'
+  });
+  
+  // Set refresh token cookie - longer lifespan
+  res.cookie('refreshToken', tokens.refreshToken, {
+    httpOnly: true,
+    secure: useSecure,
+    sameSite: 'strict',
+    maxAge: cookieMaxAge,
+    path: '/api/auth/refresh-token' // Limit to refresh endpoint only
+  });
+};
+
+/**
+ * Clear auth cookies from HTTP response
+ * @param {Object} res - Express response object
+ * @returns {void}
+ */
+TokenService.clearAuthCookies = (res) => {
+  res.clearCookie('accessToken', { path: '/' });
+  res.clearCookie('refreshToken', { path: '/api/auth/refresh-token' });
 };
 
 module.exports = TokenService;

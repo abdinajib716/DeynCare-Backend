@@ -166,6 +166,14 @@ const authSchemas = {
       })
   }),
 
+  checkEmail: Joi.object({
+    email: patterns.string.email.required()
+      .messages({
+        'string.email': 'Valid email address is required',
+        'any.required': 'Email is required'
+      })
+  }),
+
   resetPassword: Joi.object({
     token: Joi.string().required()
       .messages({

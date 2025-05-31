@@ -64,16 +64,60 @@ const createUser = async (userData, options = {}) => {
     // Normalize email to lowercase
     const normalizedEmail = email.toLowerCase().trim();
     
-    // Check if user already exists using UserHelper with the transaction session
-    const existingUser = await UserHelper.findUserByEmail(normalizedEmail, {
-      includeInactive: true,
-      throwIfNotFound: false,
-      session
-    });
+    // Use a two-phase approach to prevent race conditions:
+    // 1. First try to create a minimal placeholder user with just the email (atomic operation)
+    // 2. Then update that user with the full details if successful
     
-    if (existingUser) {
-      logWarning(`Creation attempt with existing email: ${normalizedEmail}`, 'UserService');
-      throw new AppError('Email is already registered', 409, 'conflict_error');
+    try {
+      // Generate userId first - we'll need it for both approaches
+      const userId = await idGenerator.generateUserId(User);
+      
+      // Try to create a placeholder document using findOneAndUpdate with upsert
+      // This is an atomic operation that will either:
+      // - Create the user if it doesn't exist
+      // - Return the existing user if it does (without modifying it)
+      const placeholderResult = await User.findOneAndUpdate(
+        { email: normalizedEmail }, // Query criteria
+        { 
+          $setOnInsert: { 
+            userId,
+            email: normalizedEmail,
+            status: 'pending',
+            // Don't manually set timestamps, let Mongoose handle this
+          } 
+        },
+        { 
+          new: true, // Return the document after update
+          upsert: true, // Create if doesn't exist
+          session, // Use the transaction session
+          includeResultMetadata: true, // Get full result including 'upserted' field (replacing deprecated rawResult)
+          timestamps: true, // Ensure mongoose timestamps are correctly set
+        }
+      );
+      
+      // Check if this was a new insert or an existing document
+      const isNewUser = !!placeholderResult.lastErrorObject?.upserted;
+      const placeholderUser = placeholderResult.value;
+      
+      // If not a new user, the email already exists
+      if (!isNewUser) {
+        logWarning(`Creation attempt with existing email: ${normalizedEmail}`, 'UserService');
+        throw new AppError('Email is already registered', 409, 'conflict_error');
+      }
+      
+      // Now we can safely proceed with updating the placeholder with full user details
+      // We know we created it atomically and no other request can do the same
+    } catch (error) {
+      // Check for MongoDB duplicate key error (11000) - another process beat us to it
+      if (error.name === 'MongoError' || error.name === 'MongoServerError') {
+        if (error.code === 11000 && error.keyPattern && error.keyPattern.email) {
+          logWarning(`Duplicate key error on email: ${normalizedEmail}`, 'UserService');
+          throw new AppError('Email is already registered', 409, 'conflict_error');
+        }
+      }
+      
+      // Re-throw AppError or other errors
+      throw error;
     }
 
     // Validate and sanitize role using UserHelper
@@ -97,23 +141,30 @@ const createUser = async (userData, options = {}) => {
       throw new AppError('Shop ID is required for admin and employee roles', 400, 'validation_error');
     }
     
-    const user = new User({
-      userId,
-      fullName,
-      email: normalizedEmail,
-      phone,
-      password, // Will be hashed by pre-save hook
-      role: validatedRole,
-      shopId: finalShopId,
-      status,
-      verified,
-      emailVerified,
-      verificationCode,
-      verificationCodeExpires
-    });
-
-    // Save user with session for transaction
-    await user.save({ session });
+    // Get the placeholder user first instead of using findOneAndUpdate
+    const placeholderUser = await User.findOne({ email: normalizedEmail }, null, { session });
+    
+    if (!placeholderUser) {
+      throw new AppError('User not found after initial creation', 500, 'user_creation_error');
+    }
+    
+    // Update the user properties directly to ensure password hashing middleware works
+    placeholderUser.fullName = fullName;
+    placeholderUser.phone = phone;
+    placeholderUser.password = password; // Will be hashed by pre-save hook
+    placeholderUser.role = validatedRole;
+    placeholderUser.shopId = finalShopId;
+    placeholderUser.status = status;
+    placeholderUser.verified = verified;
+    placeholderUser.emailVerified = emailVerified;
+    placeholderUser.verificationCode = verificationCode;
+    placeholderUser.verificationCodeExpires = verificationCodeExpires;
+    
+    // Save the user to trigger the password hashing middleware
+    await placeholderUser.save({ session });
+    
+    // Use the updated user
+    const user = placeholderUser;
 
     // Log user creation with LogHelper
     await LogHelper.createUserLog(
@@ -152,6 +203,14 @@ const createUser = async (userData, options = {}) => {
         logInfo('Aborted transaction due to error in user creation', 'UserService');
       } catch (abortError) {
         logError(`Error aborting transaction: ${abortError.message}`, 'UserService', abortError);
+      }
+    }
+    
+    // Handle MongoDB duplicate key errors specifically
+    if ((error.name === 'MongoError' || error.name === 'MongoServerError') && error.code === 11000) {
+      if (error.keyPattern && error.keyPattern.email) {
+        logWarning(`Duplicate key error on email during user creation`, 'UserService');
+        throw new AppError('Email is already registered', 409, 'conflict_error');
       }
     }
     

@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  deyncare-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deyncare-api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET:-your_super_secure_access_token_secret_key}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-your_super_secure_refresh_token_secret_key}
+      - JWT_ACCESS_EXPIRY=${JWT_ACCESS_EXPIRY:-15m}
+      - JWT_REFRESH_EXPIRY=${JWT_REFRESH_EXPIRY:-30d}
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - EMAIL_HOST=${EMAIL_HOST:-smtp.gmail.com}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - EMAIL_FROM=${EMAIL_FROM}
+      - CREATE_SUPER_ADMIN=${CREATE_SUPER_ADMIN:-false}
+      - SUPER_ADMIN_EMAIL=${SUPER_ADMIN_EMAIL}
+      - SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD}
+      - SUPER_ADMIN_NAME=${SUPER_ADMIN_NAME}
+      - SUPER_ADMIN_PHONE=${SUPER_ADMIN_PHONE}
+      - ENABLE_SCHEDULER=${ENABLE_SCHEDULER:-false}
+    volumes:
+      # Persistent storage for uploads
+      - deyncare_uploads:/app/uploads
+      # For development: mount the source code for hot reloading
+      - ./src:/app/src
+      # Don't overwrite node_modules in container
+      - /app/node_modules
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  deyncare_uploads:
+    # Named volume for persistent storage of uploaded files
+

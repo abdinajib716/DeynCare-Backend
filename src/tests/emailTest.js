@@ -5,22 +5,35 @@
  */
 require('dotenv').config();
 const nodemailer = require('nodemailer');
+const path = require('path');
 
-// Email configuration from .env
+// Print current directory and .env file path for debugging
+console.log('Current directory:', process.cwd());
+console.log('.env file path:', path.join(process.cwd(), '.env'));
+
+// Check if environment variables are loaded
+console.log('\n🔍 Checking environment variables:');
+console.log('EMAIL_HOST:', process.env.EMAIL_HOST || 'MISSING');
+console.log('EMAIL_PORT:', process.env.EMAIL_PORT || 'MISSING');
+console.log('EMAIL_USER:', process.env.EMAIL_USER || 'MISSING');
+console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '********' : 'MISSING');
+console.log('EMAIL_FROM:', process.env.EMAIL_FROM || 'MISSING');
+
+// Email configuration from .env with fallbacks to ensure we don't get null values
 const emailConfig = {
-  host: process.env.EMAIL_HOST,
-  port: parseInt(process.env.EMAIL_PORT),
-  secure: parseInt(process.env.EMAIL_PORT) === 465,
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.EMAIL_PORT || '587'),
+  secure: parseInt(process.env.EMAIL_PORT || '587') === 465,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    user: process.env.EMAIL_USER || '',
+    pass: process.env.EMAIL_PASS || ''
   }
 };
 
 // Test email details
 const mailOptions = {
-  from: process.env.EMAIL_FROM,
-  to: process.env.ADMIN_EMAIL, // Send to admin email for testing
+  from: process.env.EMAIL_FROM || '"DeynCare Test" <trustytester2@gmail.com>',
+  to: process.env.EMAIL_USER, // Send to the same email for testing
   subject: 'DeynCare Email Test',
   text: 'If you receive this email, the email service is working correctly.',
   html: `
@@ -87,13 +100,28 @@ async function testEmail() {
   }
 }
 
-// Run the test
+// Run the test with a timeout to ensure completion
+const EMAIL_TEST_TIMEOUT = 30000; // 30 seconds
+
+let timeoutId = setTimeout(() => {
+  console.log('\n⚠️ Test took too long to complete. The email might still be sending.');
+  console.log('Please check your email inbox for the test message.');
+  process.exit(0);
+}, EMAIL_TEST_TIMEOUT);
+
 testEmail()
   .then(success => {
+    clearTimeout(timeoutId);
     if (success) {
       console.log('\n🎉 Email service is working correctly!');
+      console.log('Check your inbox for the test email.');
     } else {
       console.log('\n❌ Email service is not working. See errors above.');
     }
     process.exit(success ? 0 : 1);
+  })
+  .catch(error => {
+    clearTimeout(timeoutId);
+    console.error('\n💥 Unexpected error:', error);
+    process.exit(1);
   });
